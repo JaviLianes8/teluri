@@ -18,6 +18,7 @@ def test_is_a_value_error_with_reason_and_message() -> None:
 def test_survives_pickling() -> None:
     copy = pickle.loads(pickle.dumps(TelURIError("param-order", "b;a")))
     assert (copy.reason, copy.message) == ("param-order", "b;a")
+    assert copy.args == ("param-order", "b;a")
 
 
 def test_the_reason_set_is_closed_and_unique() -> None:

@@ -23,9 +23,9 @@ _LOCAL = LOCAL_DIGITS | frozenset(VISUAL_SEPARATORS)
 
 
 def global_digits(raw: str, reason: Reason = "number") -> str:
-    """`global-number-digits`: a `+`, then digits and separators with at least one digit."""
+    """`global-number-digits`: digits and separators after the `+` the caller has seen."""
     body = raw[1:]
-    if not raw.startswith("+") or not only(body, _GLOBAL) or not strip_separators(body):
+    if not only(body, _GLOBAL) or not strip_separators(body):
         raise TelURIError(reason, f"not a global number: {raw!r}")
     return "+" + strip_separators(body)
 
@@ -77,8 +77,8 @@ def pname(name: str) -> str:
 
 
 def pvalue(value: str) -> str:
-    """`pvalue`, percent-decoded as UTF-8."""
-    if not value or not valid_pct(value, PARAMCHAR):
+    """`pvalue`, percent-decoded as UTF-8 (an empty one is refused by the model)."""
+    if not valid_pct(value, PARAMCHAR):
         raise TelURIError("param-value", f"not a parameter value: {value!r}")
     try:
         return unquote(value, errors="strict")

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from ._errors import Reason, TelURIError
+from ._errors import TelURIError
 from ._grammar import pname, pvalue
 from ._model import TelURI
 
-_FIELDS: dict[str, Reason] = {"ext": "ext", "isub": "isub", "phone-context": "phone-context"}
+_FIELDS = frozenset({"ext", "isub", "phone-context"})
 
 
 def parse(uri: str, *, strict: bool = False) -> TelURI:
@@ -33,9 +33,7 @@ def parse(uri: str, *, strict: bool = False) -> TelURI:
             raise TelURIError("duplicate-param", f"{name!r} appears twice")
         order.append(name)
         if name in _FIELDS:
-            if not raw_value:
-                raise TelURIError(_FIELDS[name], f"{name} needs a value")
-            fields[name] = raw_value
+            fields[name] = raw_value  # the model refuses an empty or missing value
         elif equals:
             params[name] = pvalue(raw_value)
         else:

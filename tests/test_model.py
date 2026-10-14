@@ -142,3 +142,4 @@ def test_params_mapping_behaves_like_a_mapping() -> None:
     assert params == {"a": None, "b": "2"}
     assert params.__eq__(["a"]) is NotImplemented
     assert repr(params) == "Params({'a': None, 'b': '2'})"
+    assert hash(params) == hash(frozenset({("a", None), ("b", "2")}))

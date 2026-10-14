@@ -27,7 +27,7 @@ def parse_link(href: str, *, context: str | None = None) -> TelURI:
     except UnicodeDecodeError:
         raise TelURIError("number", f"not UTF-8 once decoded: {number!r}") from None
     cleaned = "".join(char for char in decoded if not char.isspace())
-    if ";" in cleaned or "%" in cleaned:
+    if ";" in cleaned:  # an encoded separator must not start a parameter
         raise TelURIError("number", f"not a telephone number: {number!r}")
     names = [segment.partition("=")[0].lower() for segment in tail.split(";")]
     if context is not None and not cleaned.startswith("+") and "phone-context" not in names:
