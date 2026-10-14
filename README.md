@@ -59,9 +59,8 @@ enforces the order rule of section 3.
 from teluri import equivalent, parse
 
 print(equivalent("tel:+1-201-555-0123;EXT=1;a=X", "tel:+12015550123;a=x;ext=1"))  # True
-print(
-    equivalent("tel:7042;phone-context=Example.COM", "tel:7042;phone-context=example.com")
-)  # True
+domain = "tel:7042;phone-context=Example.COM."
+print(equivalent(domain, "tel:7042;phone-context=example.com"))  # True
 print(equivalent("tel:+1234", "tel:1234;phone-context=+1"))  # False
 print(len({parse("tel:+1;b;a"), parse("tel:+1;A;B")}))  # 1
 ```
