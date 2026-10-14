@@ -47,6 +47,8 @@ def main(
             args = _parser().parse_args(argv)
             if args.context is not None and not args.link:
                 _parser().error("--context needs --link")
+            if args.strict and args.link:
+                _parser().error("--strict reads RFC 3966 only and cannot be used with --link")
     except SystemExit as stop:
         return int(stop.code or 0)
     uris: Iterable[str] = args.uris or _lines(stdin or sys.stdin)
@@ -61,7 +63,7 @@ def main(
             err.write(f"invalid ({error.reason}): {_shown(uri)}\n")
             status = 1
             continue
-        out.write(json.dumps(_fields(parsed), ensure_ascii=False) if args.json else str(parsed))
+        out.write(json.dumps(_fields(parsed)) if args.json else str(parsed))
         out.write("\n")
     return status
 
@@ -87,5 +89,8 @@ def _lines(stream: TextIO) -> Iterable[str]:
 
 
 def _shown(uri: str) -> str:
-    """The input as safe to print: control and other unprintable characters escaped."""
-    return "".join(c if c.isprintable() else repr(c)[1:-1] for c in uri)
+    """The input as safe to print on any console: non-ASCII and control characters escaped."""
+    escape = "unicode_escape"
+    return "".join(
+        c if c.isascii() and c.isprintable() else c.encode(escape).decode("ascii") for c in uri
+    )

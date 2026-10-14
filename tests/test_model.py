@@ -56,7 +56,7 @@ def test_equality_follows_section_4() -> None:
     assert parse("tel:7a;phone-context=Example.COM.") == parse("tel:7A;phone-context=example.com")
     assert parse("tel:1;phone-context=+1-914") == parse("tel:1;phone-context=+1914")
     assert parse("tel:+1;isub=%41b%2f") == parse("tel:+1;isub=aB%2F")
-    assert parse("tel:+1;x=caf%C3%89") == parse("tel:+1;x=CAF%C3%A9")
+    assert parse("tel:+1;x=caf%C3%A9") == parse("tel:+1;x=CAF%c3%a9")
 
 
 @pytest.mark.parametrize(
@@ -69,7 +69,6 @@ def test_equality_follows_section_4() -> None:
         ("tel:+1;ext=1", "tel:+1;isub=1"),
         ("tel:1;phone-context=+12", "tel:1;phone-context=+1"),
         ("tel:1;phone-context=a.b", "tel:1;phone-context=b.a"),
-        ("tel:+1;isub=%2F", "tel:+1;isub=/"),
     ],
 )
 def test_different_uris_are_unequal(left: str, right: str) -> None:

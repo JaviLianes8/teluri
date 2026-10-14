@@ -23,9 +23,13 @@ All notable changes to this project are documented here. The format follows
 ### Changed
 
 - `str(TelURI)` writes the canonical form: section 3 order, lower-case parameter names.
-- `TelURI` takes `number` and keyword fields; `is_global` is now derived from the number,
-  every field is validated on construction, and `params` is read-only and hashable.
+- `TelURI(number, ext, isub, phone_context, params)`: `is_global` is now derived from the
+  number, every field is validated on construction (wrong types raise `TypeError`), and
+  `params` is read-only and hashable.
 - `params` values are percent-decoded; `isub` has its own field.
+- `build` percent-encodes `params` values, so callers that passed encoded values must now
+  pass plain text.
+- `TelURIError(reason, message)` replaces the single message argument.
 
 ## [0.1.0]
 

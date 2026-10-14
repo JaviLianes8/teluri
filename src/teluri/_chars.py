@@ -53,19 +53,3 @@ def valid_pct(value: str, allowed: frozenset[str]) -> bool:
             return False
         index += 1
     return True
-
-
-def normalize_pct(value: str) -> str:
-    """Decode escapes of unreserved characters and upper-case the rest (RFC 3966 s3)."""
-    out = []
-    index = 0
-    while index < len(value):
-        if value[index] == "%":
-            code = value[index + 1 : index + 3]
-            char = chr(int(code, 16))
-            out.append(char if char in UNRESERVED else "%" + code.upper())
-            index += 3
-        else:
-            out.append(value[index])
-            index += 1
-    return "".join(out)

@@ -16,6 +16,8 @@ def parse(uri: str, *, strict: bool = False) -> TelURI:
     rule of section 3 is enforced too: ext or isub first, then phone-context, then the
     other parameters in lexicographic order.
     """
+    if not isinstance(uri, str):
+        raise TypeError(f"uri must be a str, not {type(uri).__name__}")
     scheme, colon, rest = uri.partition(":")
     if not colon or scheme.lower() != "tel":
         raise TelURIError("scheme", f"not a tel: URI: {uri!r}")

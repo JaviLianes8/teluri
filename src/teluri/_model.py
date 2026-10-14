@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from urllib.parse import unquote_to_bytes
 
-from ._chars import RESERVED_PARAMETERS, encode_value, normalize_pct
+from ._chars import RESERVED_PARAMETERS, encode_value
 from ._errors import TelURIError
 from ._grammar import descriptor, extension, global_digits, local_digits, pname, subaddress
 from ._params import Params
@@ -31,6 +32,7 @@ class TelURI:
     params: Mapping[str, str | None] = field(default_factory=lambda: Params({}))
 
     def __post_init__(self) -> None:
+        _check_types(self)
         number = self.number
         is_global = number.startswith("+")
         set_ = object.__setattr__
@@ -100,13 +102,24 @@ class TelURI:
         return (
             self.number.lower(),
             self.ext,
-            None if self.isub is None else normalize_pct(self.isub).casefold(),
+            None if self.isub is None else unquote_to_bytes(self.isub).lower(),
             context,
             frozenset(
-                (name, None if value is None else value.casefold())
+                (name, None if value is None else value.encode("utf-8").lower())
                 for name, value in self.params.items()
             ),
         )
+
+
+def _check_types(uri: TelURI) -> None:
+    if not isinstance(uri.number, str):
+        raise TypeError(f"number must be a str, not {type(uri.number).__name__}")
+    for name in ("ext", "isub", "phone_context"):
+        value = getattr(uri, name)
+        if value is not None and not isinstance(value, str):
+            raise TypeError(f"{name} must be a str or None, not {type(value).__name__}")
+    if not isinstance(uri.params, Mapping) or not all(isinstance(k, str) for k in uri.params):
+        raise TypeError("params must be a mapping with str keys")
 
 
 def _checked(params: Mapping[str, str | None]) -> Params:
@@ -117,7 +130,15 @@ def _checked(params: Mapping[str, str | None]) -> Params:
             raise TelURIError("param-name", f"{name!r} has its own field")
         if name in items:
             raise TelURIError("duplicate-param", f"{name!r} appears twice")
-        if value is not None and (not isinstance(value, str) or not value):
+        if value is not None and (not isinstance(value, str) or not value or _unencodable(value)):
             raise TelURIError("param-value", f"{name!r} needs a non-empty text value or None")
         items[name] = value
     return Params(dict(sorted(items.items())))
+
+
+def _unencodable(text: str) -> bool:
+    try:
+        text.encode("utf-8")
+    except UnicodeEncodeError:  # a lone surrogate cannot be written in a URI
+        return True
+    return False

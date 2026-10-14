@@ -5,6 +5,7 @@ from __future__ import annotations
 from urllib.parse import unquote
 
 from ._errors import TelURIError
+from ._grammar import descriptor
 from ._model import TelURI
 from ._parse import parse
 
@@ -17,6 +18,10 @@ def parse_link(href: str, *, context: str | None = None) -> TelURI:
     reader decodes the number, drops whitespace, and gives a local number ``context``
     when the link has none. Everything after the number is read as strict RFC 3966.
     """
+    if not isinstance(href, str):
+        raise TypeError(f"href must be a str, not {type(href).__name__}")
+    if context is not None:
+        descriptor(context)  # one descriptor, so it cannot smuggle in other parameters
     text = href.strip()
     scheme, colon, rest = text.partition(":")
     if not colon or scheme.lower() != "tel":

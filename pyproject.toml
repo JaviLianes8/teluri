@@ -52,6 +52,7 @@ include = [
     "tests/upstream/MANIFEST.json",
     "scripts/fetch_upstream.py",
     "CHANGELOG.md",
+    "CONTRIBUTING.md",
     "README.md",
     "LICENSE",
     "pyproject.toml",

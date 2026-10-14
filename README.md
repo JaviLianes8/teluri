@@ -32,9 +32,11 @@ print(local.is_global)  # False
 `parse` validates the whole RFC 3966 grammar and returns a frozen `TelURI`. Visual
 separators (`-`, `.`, `(`, `)`) are removed from the number, the extension and a numeric
 `phone-context`. Other parameters land in `params`, keyed by lower-case name, with
-percent-decoded values and `None` for a parameter without a value. `str()` gives the
-canonical form: `ext` or `isub` first, then `phone-context`, then the rest sorted by name,
-as section 3 asks.
+percent-decoded values and `None` for a parameter without a value. `str()` gives a
+normalised form: separators removed, names in lower case, values re-encoded, and `ext` or
+`isub` first, then `phone-context`, then the rest sorted by name, as section 3 asks. The
+letter case of numbers, contexts and values is kept, so two equivalent URIs may still
+print differently. Wrong types (`parse(None)`, `TelURI(123)`) raise `TypeError`.
 
 ### Errors
 
@@ -51,7 +53,7 @@ print(reasons)  # ['missing-context', 'ext-and-isub', 'param-order']
 ```
 
 The ABNF accepts parameters in any order, so `parse` does too; `strict=True` also
-enforces the order rule of section 3.
+enforces the order rule of section 3, comparing names in lower case.
 
 ### Compare
 
@@ -67,8 +69,10 @@ print(len({parse("tel:+1;b;a"), parse("tel:+1;A;B")}))  # 1
 
 `==`, `hash` and `equivalent` follow section 4: global and local numbers never match,
 separators are ignored, a numeric context is compared digit by digit and a domain context
-as a host name, parameters are compared by name in any order, and the comparison is
-case-insensitive.
+as a host name (a final root dot is ignored), parameters are compared by name in any
+order, and the comparison is case-insensitive. Values, including `isub`, are compared as
+their percent-decoded octets with ASCII letters folded, so `%2F` equals `/` and `%41`
+equals `a`, while `%C3%A9` and `%C3%89` stay different.
 
 ### Build
 
@@ -97,8 +101,8 @@ print(parse_link("tel:*31%23", context="example.com").href)  # tel:*31%23;phone-
 Web pages and apps often write `tel:` links that RFC 3966 does not allow: spaces as in
 printed numbers, percent-encoded numbers, and local numbers without a `phone-context`
 (Apple's Phone Links reference shows `tel:1-408-555-5555`). `parse_link` decodes and
-cleans the number, adds `context` to a local number that has none, then validates the
-result as RFC 3966. In the other direction, `TelURI.href` writes `#` as `%23`: an HTML
+cleans the number, adds `context` (checked as a single phone-context descriptor) to a
+local number that has none, then validates the result as RFC 3966. In the other direction, `TelURI.href` writes `#` as `%23`: an HTML
 URL parser would otherwise read it as the start of a fragment. Apple also documents that
 its Phone app does not dial a link containing `*` or `#`.
 
@@ -111,8 +115,9 @@ invalid (missing-context): tel:863-1234
 ```
 
 One URI per argument, or one per line on standard input. `--json` prints every field,
-`--strict` enforces the parameter order, `--link` reads links as above and `--context`
-gives local links their context. The exit status is 1 when any input is invalid.
+`--strict` enforces the parameter order, `--link` reads links as above (not with
+`--strict`) and `--context` gives local links their context. Output is ASCII, so any
+console can print it. The exit status is 1 when any input is invalid, 2 for bad usage.
 
 ## API
 
@@ -135,7 +140,7 @@ kept in its encoded form because a subaddress may carry any octet.
 
 - `scheme`: not a `tel:` URI
 - `number`: the number is empty or has a character the grammar does not allow
-- `ext`: the extension is empty or not made of digits and separators
+- `ext`: the extension has no digit, or a character other than digits and separators
 - `isub`: the subaddress is empty or not `1*paramchar` (erratum 203)
 - `ext-and-isub`: both are present, which section 5.3 forbids
 - `phone-context`: the context is neither a global number prefix nor a domain name
