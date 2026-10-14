@@ -140,5 +140,5 @@ def test_params_mapping_behaves_like_a_mapping() -> None:
     assert list(params) == ["a", "b"]
     assert len(params) == 2
     assert params == {"a": None, "b": "2"}
-    assert params != ["a"]
+    assert params.__eq__(["a"]) is NotImplemented
     assert repr(params) == "Params({'a': None, 'b': '2'})"

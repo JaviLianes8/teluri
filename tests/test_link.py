@@ -57,9 +57,7 @@ def test_a_global_link_ignores_the_default_context() -> None:
         ("tel:+1;a=b c", {}, "param-value"),
     ],
 )
-def test_links_that_still_cannot_be_read(
-    href: str, kwargs: dict[str, str], reason: str
-) -> None:
+def test_links_that_still_cannot_be_read(href: str, kwargs: dict[str, str], reason: str) -> None:
     with pytest.raises(TelURIError) as caught:
         parse_link(href, **kwargs)
     assert caught.value.reason == reason

@@ -61,7 +61,7 @@ def main(
             err.write(f"invalid ({error.reason}): {_shown(uri)}\n")
             status = 1
             continue
-        out.write((json.dumps(_fields(parsed), ensure_ascii=False) if args.json else str(parsed)))
+        out.write(json.dumps(_fields(parsed), ensure_ascii=False) if args.json else str(parsed))
         out.write("\n")
     return status
 
