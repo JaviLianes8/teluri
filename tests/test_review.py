@@ -73,7 +73,6 @@ def test_strict_and_link_cannot_be_combined() -> None:
         {"number": "+1", "isub": b"1"},
         {"number": "1", "phone_context": 1},
         {"number": "+1", "params": [("a", "b")]},
-        {"number": "+1", "params": {1: "b"}},
     ],
 )
 def test_wrong_types_raise_type_error(kwargs: dict[str, object]) -> None:
@@ -81,10 +80,15 @@ def test_wrong_types_raise_type_error(kwargs: dict[str, object]) -> None:
         TelURI(**kwargs)  # type: ignore[arg-type]
 
 
+def test_a_non_text_parameter_name_is_named_in_the_error() -> None:
+    with pytest.raises(TypeError, match="params must be a mapping with str keys"):
+        TelURI("+1", params={1: "b"})  # type: ignore[dict-item]
+
+
 def test_parsers_refuse_non_text() -> None:
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match="uri must be a str, not NoneType"):
         parse(None)  # type: ignore[arg-type]
-    with pytest.raises(TypeError):
+    with pytest.raises(TypeError, match="href must be a str, not bytes"):
         parse_link(b"tel:+1")  # type: ignore[arg-type]
 
 
