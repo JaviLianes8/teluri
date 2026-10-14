@@ -14,8 +14,8 @@ Progress:
 - [x] Contracts: RFC examples, README examples, typing, installed wheel
 - [x] Docs and packaging: README, CHANGELOG, metadata, sdist contents
 - [x] Gates: ruff format, ruff check, mypy --strict, pytest
-- [ ] Mutation run: removing guarded logic makes the suite fail
-- [ ] Independent review findings fixed with regression tests
+- [x] Mutation run: removing guarded logic makes the suite fail
+- [x] Independent review findings fixed with regression tests
 - [ ] Pull request opened, guard clean
 
 ## Starting point
@@ -92,3 +92,18 @@ sources below:
 
 Deferred: parameter-specific grammars from RFC 4694 and 4904 (`rn`, `cic`, `tgrp`) are
 validated only as generic `pvalue`; the `isub-encoding` semantics are left to callers.
+
+## Results
+
+- Gates: `ruff format --check .`, `ruff check .`, `mypy --strict src tests` and `pytest`
+  (212 tests with the installed wheel end to end and the fetched RFC texts) exit 0.
+- Mutation run: 58 hand-written mutants on the first pass, 6 survived. Four guarded code
+  that other checks already covered (a `+` test, two empty-value tests, a `%` test in the
+  link reader; removed), two exposed missing assertions (the error `args`, the `params`
+  hash; added). The second pass, after the review fixes, ran 62 mutants including the new
+  code: two survived (type checks whose fallback was a less helpful `TypeError`) and are now
+  pinned by their messages. The suite was green before and after each run.
+- Review: ASCII-only command line output, the link context checked as one descriptor, lone
+  surrogates refused, `--strict` with `--link` refused, `TypeError` for wrong types, values
+  and `isub` compared on decoded octets with ASCII case folding, and the README and
+  CHANGELOG wording on the normalised form were fixed with tests in `tests/test_review.py`.
