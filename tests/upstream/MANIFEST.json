@@ -1,0 +1,47 @@
+{
+  "rfc3966.txt": {
+    "title": "RFC 3966, The tel URI for Telephone Numbers",
+    "url": "https://www.rfc-editor.org/rfc/rfc3966.txt",
+    "revision": "published December 2004",
+    "fetched": "2026-10-14",
+    "size": 40783,
+    "sha256": "38d9aeec48d7f07120bd603f70b2da478218ffd3356eb362a651a31d0ff816bd",
+    "licence": "IETF Trust Legal Provisions (BCP 78)"
+  },
+  "rfc4694.txt": {
+    "title": "RFC 4694, Number Portability Parameters for the \"tel\" URI",
+    "url": "https://www.rfc-editor.org/rfc/rfc4694.txt",
+    "revision": "published October 2006",
+    "fetched": "2026-10-14",
+    "size": 36910,
+    "sha256": "b95a1f04ff62aaa779e21832d417fe9e7b866ca202ae0096415446300854e12e",
+    "licence": "IETF Trust Legal Provisions (BCP 78)"
+  },
+  "rfc4715.txt": {
+    "title": "RFC 4715, The Integrated Services Digital Network (ISDN) Subaddress Encoding Type for tel URI",
+    "url": "https://www.rfc-editor.org/rfc/rfc4715.txt",
+    "revision": "published November 2006",
+    "fetched": "2026-10-14",
+    "size": 28910,
+    "sha256": "326a8c1cbb4991c4f1f82a8a9ebad62798d3559c53a446d5a9ab3955934b1d48",
+    "licence": "IETF Trust Legal Provisions (BCP 78)"
+  },
+  "rfc4759.txt": {
+    "title": "RFC 4759, The ENUM Dip Indicator Parameter for the \"tel\" URI",
+    "url": "https://www.rfc-editor.org/rfc/rfc4759.txt",
+    "revision": "published November 2006",
+    "fetched": "2026-10-14",
+    "size": 15062,
+    "sha256": "3edf3e32200326cc127acac89692d3b9f17dfefb6ede83f100d6e99acbb6751f",
+    "licence": "IETF Trust Legal Provisions (BCP 78)"
+  },
+  "rfc4904.txt": {
+    "title": "RFC 4904, Representing Trunk Groups in tel/sip Uniform Resource Identifiers (URIs)",
+    "url": "https://www.rfc-editor.org/rfc/rfc4904.txt",
+    "revision": "published June 2007",
+    "fetched": "2026-10-14",
+    "size": 41027,
+    "sha256": "a251db3b21499184a02f488538695d6d8a8da734f3b545ad134b6605f66be5d1",
+    "licence": "IETF Trust Legal Provisions (BCP 78)"
+  }
+}

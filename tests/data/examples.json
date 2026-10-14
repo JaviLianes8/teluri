@@ -1,0 +1,62 @@
+{
+ "sources": {
+  "rfc3966": {
+   "url": "https://www.rfc-editor.org/rfc/rfc3966.txt",
+   "sha256": "38d9aeec48d7f07120bd603f70b2da478218ffd3356eb362a651a31d0ff816bd"
+  },
+  "rfc4694": {
+   "url": "https://www.rfc-editor.org/rfc/rfc4694.txt",
+   "sha256": "b95a1f04ff62aaa779e21832d417fe9e7b866ca202ae0096415446300854e12e"
+  },
+  "rfc4715": {
+   "url": "https://www.rfc-editor.org/rfc/rfc4715.txt",
+   "sha256": "326a8c1cbb4991c4f1f82a8a9ebad62798d3559c53a446d5a9ab3955934b1d48"
+  },
+  "rfc4759": {
+   "url": "https://www.rfc-editor.org/rfc/rfc4759.txt",
+   "sha256": "3edf3e32200326cc127acac89692d3b9f17dfefb6ede83f100d6e99acbb6751f"
+  },
+  "rfc4904": {
+   "url": "https://www.rfc-editor.org/rfc/rfc4904.txt",
+   "sha256": "a251db3b21499184a02f488538695d6d8a8da734f3b545ad134b6605f66be5d1"
+  }
+ },
+ "note": "Extracted by script from the fetched RFC texts listed in tests/upstream/MANIFEST.json on 2026-10-14. Nothing typed by hand.",
+ "uris": {
+  "rfc3966": [
+   "tel:+1-201-555-0123",
+   "tel:7042;phone-context=example.com",
+   "tel:863-1234;phone-context=+1-914-555",
+   "tel:+1-212-555-0101",
+   "tel:+1-201-555-0111",
+   "tel:+1-555-438-3732",
+   "tel:1234;phone-context=munich.example.com",
+   "tel:+1-900-555-0191",
+   "tel:+1-800-555-0191"
+  ],
+  "rfc4694": [
+   "tel:+1-800-123-4567",
+   "tel:+1-800-123-4567;cic=+1-6789",
+   "tel:+1-202-533-1234",
+   "tel:+1-202-533-1234;npdi;rn=+1-202-544-0000",
+   "tel:+1-202-533-6789",
+   "tel:+1-202-533-6789;npdi",
+   "tel:+1-202-533-1234;npdi;rn=+1-202-000-0000",
+   "tel:+1-800-123-456",
+   "tel:+1-800-123-4567;cic=+1-56789"
+  ],
+  "rfc4715": [
+   "tel:+17005554141;isub=12345",
+   "tel:+17005554141;isub=12345;isub-encoding=nsap-ia5"
+  ],
+  "rfc4759": [
+   "tel:+441632960038",
+   "tel:+441632960038;enumdi"
+  ],
+  "rfc4904": [
+   "tel:5550100;phone-context=+1-630;tgrp=TG-1;trunk-context=example.com",
+   "tel:+16305550100;tgrp=TG-1;trunk-context=example.com",
+   "tel:+16305550100;tgrp=TG-1;trunk-context=+1-630"
+  ]
+ }
+}
