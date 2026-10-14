@@ -2,18 +2,18 @@
 
 Progress:
 - [x] Brainstorm ranked improvements (this file)
-- [ ] Pin the ground truth: RFC 3966 and parameter RFC examples, errata, manifest
-- [ ] Error reasons: `TelURIError.reason` from a closed set, picklable
-- [ ] Full RFC 3966 grammar: digits, domain names, `isub`, `pvalue`, ext and isub exclusive
-- [ ] Canonical form: section 3 parameter order, lower-case names, encoded values
-- [ ] Comparison per section 4: `==`, `hash` and `equivalent`
-- [ ] Safe builder: spaces and separators stripped, values percent-encoded, order fixed
-- [ ] Link dialect: `parse_link` for real-world `href` values, `href` for HTML
-- [ ] E.164 length check and unknown mandatory parameters
-- [ ] Command line: canonical form or JSON per URI, link mode
-- [ ] Contracts: RFC examples, README examples, typing, installed wheel
-- [ ] Docs and packaging: README, CHANGELOG, metadata, sdist contents
-- [ ] Gates: ruff format, ruff check, mypy --strict, pytest
+- [x] Pin the ground truth: RFC 3966 and parameter RFC examples, errata, manifest
+- [x] Error reasons: `TelURIError.reason` from a closed set, picklable
+- [x] Full RFC 3966 grammar: digits, domain names, `isub`, `pvalue`, ext and isub exclusive
+- [x] Canonical form: section 3 parameter order, lower-case names, encoded values
+- [x] Comparison per section 4: `==`, `hash` and `equivalent`
+- [x] Safe builder: spaces and separators stripped, values percent-encoded, order fixed
+- [x] Link dialect: `parse_link` for real-world `href` values, `href` for HTML
+- [x] E.164 length check and unknown mandatory parameters
+- [x] Command line: canonical form or JSON per URI, link mode
+- [x] Contracts: RFC examples, README examples, typing, installed wheel
+- [x] Docs and packaging: README, CHANGELOG, metadata, sdist contents
+- [x] Gates: ruff format, ruff check, mypy --strict, pytest
 - [ ] Mutation run: removing guarded logic makes the suite fail
 - [ ] Independent review findings fixed with regression tests
 - [ ] Pull request opened, guard clean
