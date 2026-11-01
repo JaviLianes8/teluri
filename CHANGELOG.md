@@ -48,6 +48,8 @@ All notable changes to this project are documented here. The format follows
 - Contracts for string subclasses that override indexing or hide invalid numbers and
   extensions through iteration, and malformed stdin under `ignore` and
   `surrogateescape` decoding policies while preserving valid neighboring lines.
+- Contracts preserving underlying numbers in strict parsing with overridden partitioning,
+  and constructor numbers and extensions with overridden indexing, including canonical URIs.
 
 ## [0.2.0]
 

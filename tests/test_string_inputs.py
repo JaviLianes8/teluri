@@ -41,6 +41,11 @@ class ReindexedText(str):
         return "tel:+9"
 
 
+class ReindexedDigits(str):
+    def __getitem__(self, key: object) -> str:
+        return "99"
+
+
 class DigitIteratorText(str):
     def __iter__(self) -> Iterator[str]:
         return iter("1")
@@ -82,8 +87,14 @@ def test_builder_normalizes_strings_before_removing_whitespace() -> None:
     assert result == "tel:12;ext=34;phone-context=+56"
 
 
-def test_parsers_use_the_underlying_string_and_context() -> None:
-    assert str(parse(AlteredText("tel:+1"))) == "tel:+1"
+@pytest.mark.parametrize("strict", [False, True])
+def test_parser_preserves_number_when_subclass_overrides_partition(strict: bool) -> None:
+    uri = parse(AlteredText("tel:+1"), strict=strict)
+    assert uri.number == "+1"
+    assert str(uri) == "tel:+1"
+
+
+def test_link_parser_uses_the_underlying_string_and_context() -> None:
     assert str(parse_link(AlteredText(" tel:12 "), context=AlteredText("example.com"))) == (
         "tel:12;phone-context=example.com"
     )
@@ -103,6 +114,18 @@ def test_equivalence_uses_underlying_text_when_indexing_is_overridden() -> None:
         assert equivalent(other, uri)
     assert not equivalent(uri, "tel:+9")
     assert not equivalent("tel:+9", uri)
+
+
+def test_constructor_preserves_number_when_subclass_overrides_indexing() -> None:
+    uri = TelURI(ReindexedDigits("12"), phone_context="+1")
+    assert uri.number == "12"
+    assert str(uri) == "tel:12;phone-context=+1"
+
+
+def test_constructor_preserves_extension_when_subclass_overrides_indexing() -> None:
+    uri = TelURI("+1", ext=ReindexedDigits("23"))
+    assert uri.ext == "23"
+    assert str(uri) == "tel:+1;ext=23"
 
 
 @pytest.mark.parametrize("number", ["1x", "1;ext=9"])
