@@ -14,6 +14,7 @@ Progress:
 - [ ] Independent reviewer (item 16)
 - [ ] Five QA lenses (item 19)
 - [x] Fix all nine QA round 1 findings; six surviving mutations now fail contracts
+- [x] Fix all four QA round 2 findings; four more surviving mutations now fail contracts
 - [x] PR #3 opened from `release/1.0.0`; guard CLEAN
 - [ ] Merge and publication reserved for the maintainer
 
@@ -159,6 +160,36 @@ Wheel and sdist pass `twine check --strict`. Behaviour changes are in CHANGELOG 
 Lenses c, d and e require independent re-verification; no replacement PASS verdict is
 claimed. Items 16, 19 and the maintainer's merge/publication remain pending.
 
+## QA lenses: round 2
+
+Reviewed base: `1df80a39651f42a7254afecfb7703c3c8f67a562`, on 2026-11-01.
+Fix commit: `b44fd7fc66061203d02009dd804411d8860643ac`. All four findings accepted.
+These are contract gaps: the existing implementation handles the reported inputs
+correctly. Runtime code and the public API are unchanged. CHANGELOG 1.0.0 records
+the added coverage.
+
+| Finding | Change and detecting contract |
+| --- | --- |
+| E07 / N03 | `test_parser_preserves_number_when_subclass_overrides_indexing` preserves the underlying number in default and strict modes; `test_equivalence_uses_underlying_text_when_indexing_is_overridden` covers both operand positions and string/model comparisons. |
+| E08 / N11 | `test_constructor_rejects_invalid_number_hidden_by_subclass_iteration` rejects invalid underlying local numbers, including an injected delimiter, with reason `number` even when iteration yields valid digits. |
+| E09 / N13 | `test_constructor_rejects_invalid_extension_hidden_by_subclass_iteration` rejects invalid underlying extensions with reason `ext` even when iteration yields valid digits. |
+| E10 / N24 | `test_malformed_stdin_preserves_valid_neighbors` now covers `utf-8:strict`, `utf-8:ignore` and `utf-8:surrogateescape` in default, link and strict modes. Malformed schemes, numbers and parameter values fail with exact bounded diagnostics while valid lines before and after them remain intact. |
+
+Each exact mutation from the review was replayed alone in an isolated source copy.
+Before the additions, all four mutants passed the complete 321-test suite with zero
+skips, reproducing the findings. With the strengthened contracts, N03, N11, N13 and
+N24 produce respectively 3, 2, 2 and 6 behavioural assertion failures, with no
+collection errors or skips. All 79 focused contracts pass on the unmodified source
+both before injection and after byte-for-byte restoration.
+
+Each required gate exits 0: `ruff format --check .`, `ruff check .`,
+`mypy --strict src` and `pytest` (349 passed, zero skips, 76.64 seconds).
+Strict source/test typing also passes on CPython 3.14.6. The full suite enables
+the recorded source references, installed 0.2.0 comparison, wheel installation,
+CLI subprocess checks and PyPI upgrade. Every test has a 300-second timeout.
+The four findings require independent lens-e re-verification; no replacement PASS
+verdict is claimed. Items 16, 19 and merge/publication remain pending.
+
 ## Initial certification gates
 
 Each command ran separately and exited 0 on 2026-11-01:
@@ -182,7 +213,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 3 | PASS: 24 doctest statements across every export and public property; README/GUIDE executed |
 | 4 | PASS: strict source and test typing, consumer inference and shipped `py.typed` |
 | 5 | PASS: typed reasons, documented TypeError paths and input-free library diagnostics |
-| 6 | PASS: 321 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
+| 6 | PASS: 349 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
 | 7 | PASS: twelve live-fetched sources, manifest, 245 reference implementation examples |
 | 8 | PASS: clean wheel install, real CLI subprocesses and PyPI 0.2.0 upgrade |
 | 9 | PASS: seeded properties, large inputs and ten scaling shapes |
@@ -194,7 +225,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 15 | PASS: four standalone gates exit 0; strict types also include tests |
 | 16 | PENDING: independent reviewer |
 | 17 | PR #3 open, guard CLEAN; merge and publication pending |
-| 18 | PASS: 24 initial mutations killed; all six lens-e survivors now caught, QA table above |
-| 19 | PENDING: nine round 1 findings fixed; independent lens re-verification required |
+| 18 | PASS: 24 initial mutations killed; all ten lens-e survivors now caught, QA tables above |
+| 19 | PENDING: nine round 1 and four round 2 findings fixed; independent lens re-verification required |
 
 PR: https://github.com/JaviLianes8/teluri/pull/3
