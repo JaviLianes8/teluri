@@ -127,4 +127,6 @@ Sources are hash-checked against the manifest and are never distributed.
 Set `TELURI_E2E=1` for wheel builds and clean-environment tests, and `TELURI_PYPI=1`
 to include installing and upgrading the published 0.2.0 release. Set `TEMP` and `TMP`
 to your scratch directory so build and venv tools use it too. The optional reference
-check uses `phonenumbers`, installed separately, and otherwise skips cleanly.
+checks use `phonenumbers` and `pypdf`, installed separately, and otherwise skip cleanly.
+`TELURI_OLD_PYTHON` can point to a separate environment containing PyPI 0.2.0 to run
+the seeded compatibility comparison without rebuilding the distributions.

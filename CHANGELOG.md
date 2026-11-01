@@ -29,6 +29,8 @@ All notable changes to this project are documented here. The format follows
 - Duplicate parameter detection uses a set rather than scanning an ever-growing list.
 - `TelURI` and `TelURIError` identify their public module as `teluri`; old pickles still
   load, and new pickles also load in 0.2.0. The accidental `annotations` attribute is removed.
+- The release helper checks version availability and a clean working tree, preserves
+  any existing `dist` directory and stops if a quality or build check fails.
 
 ### Added
 
