@@ -50,6 +50,8 @@ All notable changes to this project are documented here. The format follows
   `surrogateescape` decoding policies while preserving valid neighboring lines.
 - Contracts preserving underlying numbers in strict parsing with overridden partitioning,
   and constructor numbers and extensions with overridden indexing, including canonical URIs.
+- Contracts rejecting invalid false-valued extension subclasses whose iteration hides
+  their text, and preserving valid false-valued extensions, subaddresses and contexts.
 
 ## [0.2.0]
 

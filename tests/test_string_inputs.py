@@ -51,6 +51,11 @@ class DigitIteratorText(str):
         return iter("1")
 
 
+class FalsyDigits(DigitIteratorText):
+    def __bool__(self) -> bool:
+        return False
+
+
 @pytest.mark.parametrize("text_type", [ShortText, LongText, AlteredText])
 @pytest.mark.parametrize("value", ["a;ext=9", "a\nSECRET", "a%", ""])
 def test_subclass_subaddresses_validate_the_complete_text(text_type: type[str], value: str) -> None:
@@ -140,6 +145,27 @@ def test_constructor_rejects_invalid_extension_hidden_by_subclass_iteration(exte
     with pytest.raises(TelURIError) as caught:
         TelURI("+1", ext=DigitIteratorText(extension))
     assert caught.value.reason == "ext"
+
+
+@pytest.mark.parametrize("extension", ["x", "1x"])
+def test_constructor_rejects_invalid_false_valued_extension(extension: str) -> None:
+    with pytest.raises(TelURIError) as caught:
+        TelURI("+1", ext=FalsyDigits(extension))
+    assert caught.value.reason == "ext"
+
+
+def test_constructor_preserves_false_valued_extension_and_context() -> None:
+    uri = TelURI("12", ext=FalsyDigits("23"), phone_context=FalsyDigits("Example.com"))
+    assert type(uri.ext) is str and type(uri.phone_context) is str
+    assert (uri.ext, uri.phone_context) == ("23", "Example.com")
+    assert str(uri) == "tel:12;ext=23;phone-context=Example.com"
+
+
+def test_constructor_preserves_false_valued_subaddress() -> None:
+    uri = TelURI("+1", isub=FalsyDigits("a%FF"))
+    assert type(uri.isub) is str
+    assert uri.isub == "a%FF"
+    assert str(uri) == "tel:+1;isub=a%FF"
 
 
 def test_subclass_parameter_names_cannot_hide_reserved_fields() -> None:
