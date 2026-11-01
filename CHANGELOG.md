@@ -52,6 +52,8 @@ All notable changes to this project are documented here. The format follows
   and constructor numbers and extensions with overridden indexing, including canonical URIs.
 - Contracts rejecting invalid false-valued extension subclasses whose iteration hides
   their text, and preserving valid false-valued extensions, subaddresses and contexts.
+- Contracts rejecting invalid false-valued number subclasses and preserving valid ones,
+  plus bounded constructor type errors that omit private optional-field input.
 
 ## [0.2.0]
 

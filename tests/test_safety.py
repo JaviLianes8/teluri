@@ -56,6 +56,24 @@ def test_optional_text_fields_reject_wrong_types(value: object) -> None:
         parse_link("tel:+1", context=value)  # type: ignore[arg-type]
 
 
+@pytest.mark.parametrize("field", ["ext", "isub", "phone_context"])
+@pytest.mark.parametrize("size", [1, 100_000])
+def test_constructor_optional_type_errors_do_not_expose_input(field: str, size: int) -> None:
+    secret = "private-optional-content-42" * size
+
+    class PrivateValue:
+        def __repr__(self) -> str:
+            return secret
+
+    kwargs: dict[str, object] = {field: PrivateValue()}
+    number = "1" if field == "phone_context" else "+1"
+    with pytest.raises(TypeError) as caught:
+        TelURI(number, **kwargs)  # type: ignore[arg-type]
+    for diagnostic in (str(caught.value), repr(caught.value), repr(caught.value.args)):
+        assert "private-optional-content-42" not in diagnostic
+        assert len(diagnostic) < 100
+
+
 @pytest.mark.parametrize("value", [False, [], "", 0])
 def test_builder_rejects_false_valued_non_mappings(value: object) -> None:
     with pytest.raises(TypeError):

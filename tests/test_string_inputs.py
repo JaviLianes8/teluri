@@ -140,6 +140,21 @@ def test_constructor_rejects_invalid_number_hidden_by_subclass_iteration(number:
     assert caught.value.reason == "number"
 
 
+@pytest.mark.parametrize("number", ["1x", "1;ext=9"])
+def test_constructor_rejects_invalid_false_valued_number(number: str) -> None:
+    with pytest.raises(TelURIError) as caught:
+        TelURI(FalsyDigits(number), phone_context="+1")
+    assert caught.value.reason == "number"
+
+
+@pytest.mark.parametrize("number", ["12", "1-2"])
+def test_constructor_preserves_false_valued_number(number: str) -> None:
+    uri = TelURI(FalsyDigits(number), phone_context="+1")
+    assert type(uri.number) is str
+    assert uri.number == "12"
+    assert str(uri) == "tel:12;phone-context=+1"
+
+
 @pytest.mark.parametrize("extension", ["x", "1x"])
 def test_constructor_rejects_invalid_extension_hidden_by_subclass_iteration(extension: str) -> None:
     with pytest.raises(TelURIError) as caught:
