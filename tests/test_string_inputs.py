@@ -6,7 +6,7 @@ from collections.abc import Iterator
 
 import pytest
 
-from teluri import TelURI, TelURIError, build, parse, parse_link
+from teluri import TelURI, TelURIError, build, equivalent, parse, parse_link
 
 
 class ShortText(str):
@@ -34,6 +34,16 @@ class AlteredText(ShortText):
 
     def strip(self, chars: str | None = None) -> str:
         return "tel:+9"
+
+
+class ReindexedText(str):
+    def __getitem__(self, key: object) -> str:
+        return "tel:+9"
+
+
+class DigitIteratorText(str):
+    def __iter__(self) -> Iterator[str]:
+        return iter("1")
 
 
 @pytest.mark.parametrize("text_type", [ShortText, LongText, AlteredText])
@@ -77,6 +87,36 @@ def test_parsers_use_the_underlying_string_and_context() -> None:
     assert str(parse_link(AlteredText(" tel:12 "), context=AlteredText("example.com"))) == (
         "tel:12;phone-context=example.com"
     )
+
+
+@pytest.mark.parametrize("strict", [False, True])
+def test_parser_preserves_number_when_subclass_overrides_indexing(strict: bool) -> None:
+    uri = parse(ReindexedText("tel:+1"), strict=strict)
+    assert uri.number == "+1"
+    assert str(uri) == "tel:+1"
+
+
+def test_equivalence_uses_underlying_text_when_indexing_is_overridden() -> None:
+    uri = ReindexedText("tel:+1")
+    for other in ("tel:+1", TelURI("+1")):
+        assert equivalent(uri, other)
+        assert equivalent(other, uri)
+    assert not equivalent(uri, "tel:+9")
+    assert not equivalent("tel:+9", uri)
+
+
+@pytest.mark.parametrize("number", ["1x", "1;ext=9"])
+def test_constructor_rejects_invalid_number_hidden_by_subclass_iteration(number: str) -> None:
+    with pytest.raises(TelURIError) as caught:
+        TelURI(DigitIteratorText(number), phone_context="+1")
+    assert caught.value.reason == "number"
+
+
+@pytest.mark.parametrize("extension", ["x", "1x"])
+def test_constructor_rejects_invalid_extension_hidden_by_subclass_iteration(extension: str) -> None:
+    with pytest.raises(TelURIError) as caught:
+        TelURI("+1", ext=DigitIteratorText(extension))
+    assert caught.value.reason == "ext"
 
 
 def test_subclass_parameter_names_cannot_hide_reserved_fields() -> None:

@@ -33,10 +33,19 @@ def _run(*args: str, data: bytes = b"", encoding: str = "utf-8:strict") -> tuple
 
 
 @pytest.mark.parametrize("args", [(), ("--link",), ("--strict",)])
-@pytest.mark.parametrize("bad", [b"\xffPRIVATE", b"tel:+1;note=\xff" + b"PRIVATE" * 10_000])
-def test_malformed_stdin_preserves_valid_neighbors(args: tuple[str, ...], bad: bytes) -> None:
-    reason = "param-value" if bad.startswith(b"tel:") else "scheme"
-    assert _run(*args, data=b"tel:+1\n" + bad + b"\ntel:+2\n") == (
+@pytest.mark.parametrize("encoding", ["utf-8:strict", "utf-8:ignore", "utf-8:surrogateescape"])
+@pytest.mark.parametrize(
+    "bad,reason",
+    [
+        (b"\xffPRIVATE", "scheme"),
+        (b"tel:+9\xff", "number"),
+        (b"tel:+1;note=\xff" + b"PRIVATE" * 10_000, "param-value"),
+    ],
+)
+def test_malformed_stdin_preserves_valid_neighbors(
+    args: tuple[str, ...], encoding: str, bad: bytes, reason: str
+) -> None:
+    assert _run(*args, data=b"tel:+1\n" + bad + b"\ntel:+2\n", encoding=encoding) == (
         1,
         "tel:+1\ntel:+2\n",
         f"invalid ({reason})\n",
