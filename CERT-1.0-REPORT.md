@@ -16,6 +16,7 @@ Progress:
 - [x] Fix all nine QA round 1 findings; six surviving mutations now fail contracts
 - [x] Fix all four QA round 2 findings; four more surviving mutations now fail contracts
 - [x] Fix all three QA round 3 findings; strict parsing and constructor mutations now fail contracts
+- [x] Fix QA round 4 finding E14; false-valued optional string mutation now fails contracts
 - [x] PR #3 opened from `release/1.0.0`; guard CLEAN
 - [ ] Merge and publication reserved for the maintainer
 
@@ -220,6 +221,33 @@ CLI subprocess checks and PyPI upgrade. Every test has a 300-second timeout.
 The three findings require independent lens-e re-verification; no replacement PASS
 verdict is claimed. Items 16, 19 and merge/publication remain pending.
 
+## QA lenses: round 4
+
+Reviewed base: `43b38cd5fc34849a7b1a219a3684171329e39782`, on 2026-11-01.
+Fix commit: `15b830ed05d48615d9f9ff48f05d9a49bc933d6f`. Finding E14 accepted.
+This is a contract gap: the existing implementation normalizes false-valued string
+subclasses before validation. Runtime behaviour and the public API are unchanged.
+CHANGELOG 1.0.0 records the added coverage.
+
+| Finding | Change and detecting contract |
+| --- | --- |
+| E14 / R09 | `test_constructor_rejects_invalid_false_valued_extension` requires `TelURIError` with reason `ext` for underlying `x` and `1x` when `__bool__` returns false and iteration yields `1`. `test_constructor_preserves_false_valued_extension_and_context` and `test_constructor_preserves_false_valued_subaddress` assert plain-string storage, original values and complete canonical URIs for valid false-valued optional fields. |
+
+The exact R09 mutation was replayed in an isolated source copy. It passed all 353
+original tests with zero skips, reproducing the survivor. With the new contracts,
+R09 causes four behavioural failures: two invalid extensions are accepted, a context
+retains its subclass, and a valid subaddress is rejected. There are no collection
+errors or skips. All 34 strengthened string-input contracts pass before injection
+and after byte-for-byte source restoration against the unchanged repository source.
+
+Each required gate exits 0: `ruff format --check .`, `ruff check .`,
+`mypy --strict src` and `pytest` (357 passed, zero skips).
+Strict source/test typing also passes on CPython 3.14.6. The full suite enables
+the recorded source references, installed 0.2.0 comparison, wheel installation,
+CLI subprocess checks and PyPI upgrade. Every test has a 300-second timeout.
+E14 requires independent lens-e re-verification; no replacement PASS verdict is
+claimed. Items 16, 19 and merge/publication remain pending.
+
 ## Initial certification gates
 
 Each command ran separately and exited 0 on 2026-11-01:
@@ -243,7 +271,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 3 | PASS: 24 doctest statements across every export and public property; README/GUIDE executed |
 | 4 | PASS: strict source and test typing, consumer inference and shipped `py.typed` |
 | 5 | PASS: typed reasons, documented TypeError paths and input-free library diagnostics |
-| 6 | PASS: 353 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
+| 6 | PASS: 357 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
 | 7 | PASS: twelve live-fetched sources, manifest, 245 reference implementation examples |
 | 8 | PASS: clean wheel install, real CLI subprocesses and PyPI 0.2.0 upgrade |
 | 9 | PASS: seeded properties, large inputs and ten scaling shapes |
@@ -255,7 +283,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 15 | PASS: four standalone gates exit 0; strict types also include tests |
 | 16 | PENDING: independent reviewer |
 | 17 | PR #3 open, guard CLEAN; merge and publication pending |
-| 18 | PASS: 24 initial mutations killed; all thirteen lens-e survivors now caught, QA tables above |
-| 19 | PENDING: nine round 1, four round 2 and three round 3 findings fixed; independent lens re-verification required |
+| 18 | PASS: 24 initial mutations killed; all fourteen lens-e survivors now caught, QA tables above |
+| 19 | PENDING: nine round 1, four round 2, three round 3 and one round 4 findings fixed; independent lens re-verification required |
 
 PR: https://github.com/JaviLianes8/teluri/pull/3
