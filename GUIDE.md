@@ -93,6 +93,9 @@ Wrong argument types raise `TypeError`: URI text, number and optional string fie
 the boolean `strict`, the default link context, and mapping keys. Invalid generic
 parameter values, including non-strings, raise `TelURIError` with `param-value`.
 `None` is accepted only where shown in the signatures.
+String subclasses are accepted using their underlying text, without invoking overridden
+string operations. Validation and stored fields use plain strings, including parameter
+names and values.
 
 ## Command line
 
@@ -107,6 +110,10 @@ canonical line on stdout; each invalid URI produces `invalid (reason)` on stderr
 Exit codes: 0 for success or help, 1 if any URI is invalid or an output pipe closes,
 2 for invalid command-line usage. Inputs are processed independently and in order.
 Diagnostics are ASCII, bounded per input, and omit the supplied data.
+Stdin uses its configured encoding. Malformed byte sequences become replacement
+characters, which fail URI validation on that line; valid neighboring lines still run.
+Only line endings are removed in the default and `--strict` modes. `--link` removes
+surrounding whitespace, but a whitespace-only line is invalid in every mode.
 
 ## Upgrading from 0.2.0
 

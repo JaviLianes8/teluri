@@ -138,10 +138,13 @@ class TelURI:
 def _check_types(uri: TelURI) -> None:
     if not isinstance(uri.number, str):
         raise TypeError("number must be a str")
+    object.__setattr__(uri, "number", str.__str__(uri.number))
     for name in ("ext", "isub", "phone_context"):
         value = getattr(uri, name)
         if value is not None and not isinstance(value, str):
             raise TypeError(f"{name} must be a str or None")
+        if value is not None:
+            object.__setattr__(uri, name, str.__str__(value))
     if not isinstance(uri.params, Mapping) or not all(isinstance(k, str) for k in uri.params):
         raise TypeError("params must be a mapping with str keys")
 
@@ -149,11 +152,13 @@ def _check_types(uri: TelURI) -> None:
 def _checked(params: Mapping[str, str | None]) -> Params:
     items: dict[str, str | None] = {}
     for raw, value in params.items():
-        name = pname(raw)
+        name = pname(str.__str__(raw))
         if name in RESERVED_PARAMETERS:
             raise TelURIError("param-name", "reserved parameters have their own fields")
         if name in items:
             raise TelURIError("duplicate-param", "a parameter appears twice")
+        if isinstance(value, str):
+            value = str.__str__(value)
         if value is not None and (not isinstance(value, str) or not value or _unencodable(value)):
             raise TelURIError("param-value", "parameters need non-empty text values or None")
         items[name] = value

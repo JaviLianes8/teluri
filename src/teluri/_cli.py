@@ -117,6 +117,9 @@ def _fields(uri: TelURI) -> dict[str, object]:
 
 
 def _lines(stream: TextIO) -> Iterable[str]:
+    if isinstance(stream, io.TextIOWrapper):
+        # Replacement characters fail URI validation without losing neighboring lines.
+        stream.reconfigure(errors="replace")
     for line in stream:
         text = line.rstrip("\r\n")
         if text:

@@ -26,6 +26,11 @@ All notable changes to this project are documented here. The format follows
   stripping whitespace and rejects false-valued non-mappings in `params`.
 - Wrong-type diagnostics use fixed descriptions rather than user-controlled type names.
 - CLI output failures caused by a closed pipe return 1 without a traceback.
+- String subclasses are normalized to plain strings before validation and storage,
+  including mapping keys and values, so overridden operations cannot bypass validation.
+- CLI stdin decoding keeps its configured encoding and replaces malformed bytes with
+  characters that fail URI validation. Invalid lines receive bounded diagnostics and
+  valid neighboring lines are processed, even with strict input decoding configured.
 - Duplicate parameter detection uses a set rather than scanning an ever-growing list.
 - `TelURI` and `TelURIError` identify their public module as `teluri`; old pickles still
   load, and new pickles also load in 0.2.0. The accidental `annotations` attribute is removed.
@@ -36,6 +41,10 @@ All notable changes to this project are documented here. The format follows
 
 - Runnable public docstrings, a guide with explicit grammar policies, strict consumer
   typing checks, seeded properties, refreshed source checks and wheel upgrade tests.
+- Source distributions include the development requirements and check script referenced
+  by their contributor instructions.
+- Contracts for long domain contexts, multiple href hashes, reflected equality,
+  single-pass link decoding, populated CLI JSON fields and stdin whitespace handling.
 
 ## [0.2.0]
 

@@ -42,4 +42,4 @@ def build(
 def _unspaced(text: str) -> str:
     if not isinstance(text, str):
         raise TypeError("number, ext and phone_context must be strings when supplied")
-    return "".join(char for char in text if not char.isspace())
+    return "".join(char for char in str.__str__(text) if not char.isspace())

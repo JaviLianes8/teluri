@@ -52,6 +52,8 @@ include = [
     "tests/data/examples.json",
     "tests/upstream/MANIFEST.json",
     "scripts/fetch_upstream.py",
+    "scripts/check.ps1",
+    "requirements-dev.txt",
     "CHANGELOG.md",
     "CONTRIBUTING.md",
     "README.md",

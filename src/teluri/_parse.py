@@ -24,6 +24,7 @@ def parse(uri: str, *, strict: bool = False) -> TelURI:
         raise TypeError("uri must be a str")
     if not isinstance(strict, bool):
         raise TypeError("strict must be a bool")
+    uri = str.__str__(uri)
     scheme, colon, rest = uri.partition(":")
     if not colon or scheme.lower() != "tel":
         raise TelURIError("scheme", "expected a tel: URI")

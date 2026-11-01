@@ -24,9 +24,11 @@ def parse_link(href: str, *, context: str | None = None) -> TelURI:
     """
     if not isinstance(href, str):
         raise TypeError("href must be a str")
+    href = str.__str__(href)
     if context is not None:
         if not isinstance(context, str):
             raise TypeError("context must be a str or None")
+        context = str.__str__(context)
         descriptor(context)  # one descriptor, so it cannot smuggle in other parameters
     text = href.strip()
     scheme, colon, rest = text.partition(":")

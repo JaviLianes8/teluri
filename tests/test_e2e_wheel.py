@@ -170,7 +170,15 @@ def test_distributions_ship_no_third_party_text(distributions: Path) -> None:
     assert not any(n.startswith((".github", "IMPROVEMENTS")) for n in names), names
     assert "teluri/py.typed" in wheel_names
     assert any(n.endswith("/licenses/LICENSE") for n in wheel_names)
-    assert {"LICENSE", "README.md", "GUIDE.md", "CHANGELOG.md"} <= set(names)
+    assert {
+        "LICENSE",
+        "README.md",
+        "GUIDE.md",
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "requirements-dev.txt",
+        "scripts/check.ps1",
+    } <= set(names)
     assert not any("__pycache__" in n or n.endswith(".pyc") for n in names + wheel_names)
     assert not any("CERT-" in n or ".venv" in n for n in names + wheel_names)
     for name in names:
