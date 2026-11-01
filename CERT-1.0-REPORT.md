@@ -15,6 +15,7 @@ Progress:
 - [ ] Five QA lenses (item 19)
 - [x] Fix all nine QA round 1 findings; six surviving mutations now fail contracts
 - [x] Fix all four QA round 2 findings; four more surviving mutations now fail contracts
+- [x] Fix all three QA round 3 findings; strict parsing and constructor mutations now fail contracts
 - [x] PR #3 opened from `release/1.0.0`; guard CLEAN
 - [ ] Merge and publication reserved for the maintainer
 
@@ -190,6 +191,35 @@ CLI subprocess checks and PyPI upgrade. Every test has a 300-second timeout.
 The four findings require independent lens-e re-verification; no replacement PASS
 verdict is claimed. Items 16, 19 and merge/publication remain pending.
 
+## QA lenses: round 3
+
+Reviewed base: `bcc0a784c39b0931eadf962de376298480f6e612`, on 2026-11-01.
+Fix commit: `72ce5d63ff003c4defabf4a5d85c302e4cbaeb97`. All three findings accepted.
+These are contract gaps: the existing implementation preserves the underlying text
+for each reported input. Runtime behaviour and the public API are unchanged.
+CHANGELOG 1.0.0 records the added coverage.
+
+| Finding | Change and detecting contract |
+| --- | --- |
+| E11 / S03 | `test_parser_preserves_number_when_subclass_overrides_partition` covers default and strict parsing with an overridden `partition`, asserting the underlying `+1` number and canonical `tel:+1` URI. |
+| E12 / S04 | `test_constructor_preserves_number_when_subclass_overrides_indexing` asserts the underlying local number `12` and complete canonical URI when indexing returns substituted digits. |
+| E13 / S06 | `test_constructor_preserves_extension_when_subclass_overrides_indexing` asserts the underlying extension `23` and complete canonical URI when indexing returns substituted digits. |
+
+Each exact mutation was replayed alone in an isolated source copy. All three passed
+the original 26 string-input contracts. With the strengthened contracts, S03, S04
+and S06 each fail the corresponding value assertion above: substituted values are
+`+9`, `99` and `99`, respectively. There are no collection errors or skips.
+All 30 strengthened string-input contracts pass before injection and after restoring
+the source bytes, which were compared with the unchanged repository sources.
+
+Each required gate exits 0: `ruff format --check .`, `ruff check .`,
+`mypy --strict src` and `pytest` (353 passed, zero skips).
+Strict source/test typing also passes on CPython 3.14.6. The full suite enables
+the recorded source references, installed 0.2.0 comparison, wheel installation,
+CLI subprocess checks and PyPI upgrade. Every test has a 300-second timeout.
+The three findings require independent lens-e re-verification; no replacement PASS
+verdict is claimed. Items 16, 19 and merge/publication remain pending.
+
 ## Initial certification gates
 
 Each command ran separately and exited 0 on 2026-11-01:
@@ -213,7 +243,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 3 | PASS: 24 doctest statements across every export and public property; README/GUIDE executed |
 | 4 | PASS: strict source and test typing, consumer inference and shipped `py.typed` |
 | 5 | PASS: typed reasons, documented TypeError paths and input-free library diagnostics |
-| 6 | PASS: 349 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
+| 6 | PASS: 353 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
 | 7 | PASS: twelve live-fetched sources, manifest, 245 reference implementation examples |
 | 8 | PASS: clean wheel install, real CLI subprocesses and PyPI 0.2.0 upgrade |
 | 9 | PASS: seeded properties, large inputs and ten scaling shapes |
@@ -225,7 +255,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 15 | PASS: four standalone gates exit 0; strict types also include tests |
 | 16 | PENDING: independent reviewer |
 | 17 | PR #3 open, guard CLEAN; merge and publication pending |
-| 18 | PASS: 24 initial mutations killed; all ten lens-e survivors now caught, QA tables above |
-| 19 | PENDING: nine round 1 and four round 2 findings fixed; independent lens re-verification required |
+| 18 | PASS: 24 initial mutations killed; all thirteen lens-e survivors now caught, QA tables above |
+| 19 | PENDING: nine round 1, four round 2 and three round 3 findings fixed; independent lens re-verification required |
 
 PR: https://github.com/JaviLianes8/teluri/pull/3
