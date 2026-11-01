@@ -79,7 +79,7 @@ def test_installed_wheel_end_to_end(tmp_path: Path) -> None:
     cli = _run(script, "tel:+1-2;Ext=3", "tel:12", cwd=work)
     assert cli.returncode == 1
     assert cli.stdout == "tel:+12;ext=3\n"
-    assert cli.stderr == "invalid (missing-context): tel:12\n"
+    assert cli.stderr == "invalid (missing-context)\n"
 
 
 def test_distributions_ship_no_third_party_text(tmp_path: Path) -> None:

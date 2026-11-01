@@ -21,11 +21,11 @@ def test_prints_the_canonical_form() -> None:
 def test_reports_each_invalid_uri_and_exits_one() -> None:
     status, out, err = _run("tel:12", "tel:+1")
     assert (status, out) == (1, "tel:+1\n")
-    assert err == "invalid (missing-context): tel:12\n"
+    assert err == "invalid (missing-context)\n"
 
 
 def test_escapes_unprintable_input_in_errors() -> None:
-    assert _run("tel:+1\x1b")[2] == "invalid (number): tel:+1\\x1b\n"
+    assert _run("tel:+1\x1b")[2] == "invalid (number)\n"
 
 
 def test_json_output_lists_every_field() -> None:

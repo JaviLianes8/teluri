@@ -3,7 +3,7 @@
     "title": "RFC 3966, The tel URI for Telephone Numbers",
     "url": "https://www.rfc-editor.org/rfc/rfc3966.txt",
     "revision": "published December 2004",
-    "fetched": "2026-10-14",
+    "fetched": "2026-11-01",
     "size": 40783,
     "sha256": "38d9aeec48d7f07120bd603f70b2da478218ffd3356eb362a651a31d0ff816bd",
     "licence": "IETF Trust Legal Provisions (BCP 78)"
@@ -12,7 +12,7 @@
     "title": "RFC 4694, Number Portability Parameters for the \"tel\" URI",
     "url": "https://www.rfc-editor.org/rfc/rfc4694.txt",
     "revision": "published October 2006",
-    "fetched": "2026-10-14",
+    "fetched": "2026-11-01",
     "size": 36910,
     "sha256": "b95a1f04ff62aaa779e21832d417fe9e7b866ca202ae0096415446300854e12e",
     "licence": "IETF Trust Legal Provisions (BCP 78)"
@@ -21,7 +21,7 @@
     "title": "RFC 4715, The Integrated Services Digital Network (ISDN) Subaddress Encoding Type for tel URI",
     "url": "https://www.rfc-editor.org/rfc/rfc4715.txt",
     "revision": "published November 2006",
-    "fetched": "2026-10-14",
+    "fetched": "2026-11-01",
     "size": 28910,
     "sha256": "326a8c1cbb4991c4f1f82a8a9ebad62798d3559c53a446d5a9ab3955934b1d48",
     "licence": "IETF Trust Legal Provisions (BCP 78)"
@@ -30,7 +30,7 @@
     "title": "RFC 4759, The ENUM Dip Indicator Parameter for the \"tel\" URI",
     "url": "https://www.rfc-editor.org/rfc/rfc4759.txt",
     "revision": "published November 2006",
-    "fetched": "2026-10-14",
+    "fetched": "2026-11-01",
     "size": 15062,
     "sha256": "3edf3e32200326cc127acac89692d3b9f17dfefb6ede83f100d6e99acbb6751f",
     "licence": "IETF Trust Legal Provisions (BCP 78)"
@@ -39,9 +39,63 @@
     "title": "RFC 4904, Representing Trunk Groups in tel/sip Uniform Resource Identifiers (URIs)",
     "url": "https://www.rfc-editor.org/rfc/rfc4904.txt",
     "revision": "published June 2007",
-    "fetched": "2026-10-14",
+    "fetched": "2026-11-01",
     "size": 41027,
     "sha256": "a251db3b21499184a02f488538695d6d8a8da734f3b545ad134b6605f66be5d1",
     "licence": "IETF Trust Legal Provisions (BCP 78)"
+  },
+  "errata203.html": {
+    "url": "https://www.rfc-editor.org/errata/eid203",
+    "title": "Verified RFC 3966 erratum 203",
+    "revision": "retrieved 2026-11-01",
+    "licence": "Source publisher terms; local reference only",
+    "fetched": "2026-11-01",
+    "size": 6942,
+    "sha256": "6abb197de759191d771ca9f6780c737af91744176f1ba2c969240b5c8c912342"
+  },
+  "apple.html": {
+    "url": "https://developer.apple.com/library/archive/featuredarticles/iPhoneURLScheme_Reference/PhoneLinks/PhoneLinks.html",
+    "title": "Apple Phone Links",
+    "revision": "retrieved 2026-11-01",
+    "licence": "Source publisher terms; local reference only",
+    "fetched": "2026-11-01",
+    "size": 16268,
+    "sha256": "246d4bc6155d72d279dda3d2458234b30b020c577baf463ceb9ac6afcf807cfe"
+  },
+  "phonenumbers.txt": {
+    "url": "https://raw.githubusercontent.com/daviddrysdale/python-phonenumbers/dev/README.md",
+    "title": "python-phonenumbers README",
+    "revision": "retrieved 2026-11-01",
+    "licence": "Source publisher terms; local reference only",
+    "fetched": "2026-11-01",
+    "size": 9421,
+    "sha256": "ebf38fed861a53d06955764465597f71842c89b25671b3d779c074c0d9542bf9"
+  },
+  "urllib.html": {
+    "url": "https://docs.python.org/3/library/urllib.parse.html",
+    "title": "Python urllib.parse documentation",
+    "revision": "retrieved 2026-11-01",
+    "licence": "Source publisher terms; local reference only",
+    "fetched": "2026-11-01",
+    "size": 119730,
+    "sha256": "a481cfcca0f67af6455906279ea152a68424d5f371097a745f17ab20c6950f35"
+  },
+  "iana.xml": {
+    "url": "https://www.iana.org/assignments/tel-uri-parameters/tel-uri-parameters.xml",
+    "title": "IANA tel URI parameters",
+    "revision": "retrieved 2026-11-01",
+    "licence": "Source publisher terms; local reference only",
+    "fetched": "2026-11-01",
+    "size": 3665,
+    "sha256": "54167f2c853a716f4c304aa5049fc9ffe43b7697c2b4abb6b0070e9d5ab6ab86"
+  },
+  "mdn.html": {
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/a",
+    "title": "MDN anchor element",
+    "revision": "retrieved 2026-11-01",
+    "licence": "Source publisher terms; local reference only",
+    "fetched": "2026-11-01",
+    "size": 225732,
+    "sha256": "3b7d9c3f62c2ec3174386f8f7ed13b50732e7226b846ba00b0b4a08f7ebd0923"
   }
 }

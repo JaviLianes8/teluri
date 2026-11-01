@@ -21,6 +21,10 @@ def build(
     phone-context, so printed forms such as ``+1 (201) 555-0123`` are accepted. A number
     with a leading ``+`` is global; any other needs ``phone_context``. ``isub`` is taken
     in its encoded form. ``params`` values are plain text and are percent-encoded.
+
+    >>> from teluri import build
+    >>> build("+1 (201)", params={"note": "a;b"})
+    'tel:+1201;note=a%3Bb'
     """
     context = phone_context
     if context is not None and _unspaced(context).startswith("+"):
@@ -30,10 +34,12 @@ def build(
         ext=None if ext is None else _unspaced(ext),
         isub=isub,
         phone_context=context,
-        params=params or {},
+        params={} if params is None else params,
     )
     return str(uri)
 
 
 def _unspaced(text: str) -> str:
+    if not isinstance(text, str):
+        raise TypeError("number, ext and phone_context must be strings when supplied")
     return "".join(char for char in text if not char.isspace())

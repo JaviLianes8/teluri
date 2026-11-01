@@ -6,6 +6,35 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-01
+
+### Stable
+
+- The seven exported names, their signatures and defaults: `Reason`, `TelURI`,
+  `TelURIError`, `build`, `equivalent`, `parse` and `parse_link`.
+- Validated immutable URI fields, canonical serialization, RFC 3966 comparison,
+  the explicit link dialect, typed error reasons and command-line modes.
+- Python 3.10 through 3.14; no runtime dependencies; `py.typed` included.
+
+### Changed
+
+- Library errors and CLI diagnostics no longer echo input, parameter names or values.
+  CLI usage errors also omit arbitrary arguments. Error reasons remain unchanged;
+  caller-created `TelURIError(reason, message)` still preserves its message and args.
+- `parse` requires a boolean `strict`; `parse_link` rejects a non-string context with
+  `TypeError` rather than leaking `AttributeError`. `build` checks strings before
+  stripping whitespace and rejects false-valued non-mappings in `params`.
+- Wrong-type diagnostics use fixed descriptions rather than user-controlled type names.
+- CLI output failures caused by a closed pipe return 1 without a traceback.
+- Duplicate parameter detection uses a set rather than scanning an ever-growing list.
+- `TelURI` and `TelURIError` identify their public module as `teluri`; old pickles still
+  load, and new pickles also load in 0.2.0. The accidental `annotations` attribute is removed.
+
+### Added
+
+- Runnable public docstrings, a guide with explicit grammar policies, strict consumer
+  typing checks, seeded properties, refreshed source checks and wheel upgrade tests.
+
 ## [0.2.0]
 
 ### Added

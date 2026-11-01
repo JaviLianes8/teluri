@@ -15,12 +15,18 @@ def parse(uri: str, *, strict: bool = False) -> TelURI:
     Parameters may come in any order, as the ABNF allows. With ``strict=True`` the order
     rule of section 3 is enforced too: ext or isub first, then phone-context, then the
     other parameters in lexicographic order.
+
+    >>> from teluri import parse
+    >>> str(parse("TEL:+1-201;ext=2"))
+    'tel:+1201;ext=2'
     """
     if not isinstance(uri, str):
-        raise TypeError(f"uri must be a str, not {type(uri).__name__}")
+        raise TypeError("uri must be a str")
+    if not isinstance(strict, bool):
+        raise TypeError("strict must be a bool")
     scheme, colon, rest = uri.partition(":")
     if not colon or scheme.lower() != "tel":
-        raise TelURIError("scheme", f"not a tel: URI: {uri!r}")
+        raise TelURIError("scheme", "expected a tel: URI")
     number, *segments = rest.split(";")
     if not number:
         raise TelURIError("number", "the telephone number is empty")
@@ -28,11 +34,13 @@ def parse(uri: str, *, strict: bool = False) -> TelURI:
     fields: dict[str, str] = {}
     params: dict[str, str | None] = {}
     order: list[str] = []
+    seen: set[str] = set()
     for segment in segments:
         raw_name, equals, raw_value = segment.partition("=")
         name = pname(raw_name)
-        if name in order:
-            raise TelURIError("duplicate-param", f"{name!r} appears twice")
+        if name in seen:
+            raise TelURIError("duplicate-param", "a parameter appears twice")
+        seen.add(name)
         order.append(name)
         if name in _FIELDS:
             fields[name] = raw_value  # the model refuses an empty or missing value
@@ -49,7 +57,7 @@ def parse(uri: str, *, strict: bool = False) -> TelURI:
         params=params,
     )
     if strict and order != _canonical_order(order):
-        raise TelURIError("param-order", f"parameters out of order: {';'.join(order)}")
+        raise TelURIError("param-order", "parameters are out of order")
     return result
 
 
@@ -62,6 +70,10 @@ def equivalent(a: str | TelURI, b: str | TelURI) -> bool:
     """True when two tel: URIs are equivalent under RFC 3966 section 4.
 
     Strings are parsed first, so a malformed one raises :class:`TelURIError`.
+
+    >>> from teluri import equivalent
+    >>> equivalent("tel:+1-201;a=X", "tel:+1201;A=x")
+    True
     """
     left = a if isinstance(a, TelURI) else parse(a)
     right = b if isinstance(b, TelURI) else parse(b)
