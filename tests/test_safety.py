@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import errno
 import io
 from collections.abc import Callable
 
@@ -90,3 +91,13 @@ def test_cli_handles_a_closed_output_pipe() -> None:
             raise BrokenPipeError
 
     assert main(["tel:+1"], io.StringIO(), ClosedPipe(), io.StringIO()) == 1
+
+
+def test_cli_does_not_hide_unrelated_os_errors() -> None:
+    class FullDisk(io.StringIO):
+        def write(self, text: str) -> int:
+            raise OSError(errno.ENOSPC, "disk full")
+
+    with pytest.raises(OSError) as caught:
+        main(["tel:+1"], io.StringIO(), FullDisk(), io.StringIO())
+    assert caught.value.errno == errno.ENOSPC

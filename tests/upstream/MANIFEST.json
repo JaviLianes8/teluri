@@ -97,5 +97,14 @@
     "fetched": "2026-11-01",
     "size": 225732,
     "sha256": "3b7d9c3f62c2ec3174386f8f7ed13b50732e7226b846ba00b0b4a08f7ebd0923"
+  },
+  "e164.pdf": {
+    "url": "https://www.itu.int/rec/dologin_pub.asp?id=T-REC-E.164-202602-I!!PDF-E&lang=e&type=items",
+    "title": "ITU-T E.164",
+    "revision": "February 2026, section 6.1",
+    "fetched": "2026-11-01",
+    "size": 1183511,
+    "sha256": "63c85c6904f4d92c239fc70cf059a1565fe4731d5f9c7a4ea810c0880c2af6ab",
+    "licence": "Copyright ITU 2026; local reference only"
   }
 }

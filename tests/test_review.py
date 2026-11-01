@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -20,8 +21,13 @@ def test_json_output_is_ascii_so_any_console_can_print_it() -> None:
     result = subprocess.run(
         [sys.executable, "-m", "teluri", "--json", "tel:+1;a=%E4%B8%AD", "tel:+2"],
         capture_output=True,
-        cwd=SRC,
-        env={"PYTHONDONTWRITEBYTECODE": "1", "PYTHONIOENCODING": "cp1252", "SYSTEMROOT": ""},
+        cwd=SRC.parent,
+        env={
+            **os.environ,
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONIOENCODING": "cp1252",
+            "PYTHONPATH": str(SRC),
+        },
         check=False,
     )
     assert result.returncode == 0, result.stderr

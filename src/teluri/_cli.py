@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import errno
 import io
 import json
 import sys
@@ -52,7 +53,12 @@ def main(
         (stdout or sys.stdout).flush()
         (stderr or sys.stderr).flush()
         return status
-    except BrokenPipeError:
+    except OSError as error:
+        # Windows reports a closed anonymous pipe as EINVAL, rather than EPIPE.
+        if not isinstance(error, BrokenPipeError) and not (
+            sys.platform == "win32" and error.errno == errno.EINVAL
+        ):
+            raise
         # Prevent a second flush of a closed pipe during interpreter shutdown.
         if stdout is None:
             sys.stdout = io.StringIO()
