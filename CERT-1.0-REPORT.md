@@ -13,6 +13,7 @@ Progress:
 - [x] Final gates and distribution inspection
 - [ ] Independent reviewer (item 16)
 - [ ] Five QA lenses (item 19)
+- [x] Fix all nine QA round 1 findings; six surviving mutations now fail contracts
 - [x] PR #3 opened from `release/1.0.0`; guard CLEAN
 - [ ] Merge and publication reserved for the maintainer
 
@@ -129,12 +130,36 @@ The listed node is the first failing contract, not merely a collection or syntax
 | M23 | accept nonboolean strict | `tests/test_safety.py::test_strict_must_be_a_boolean[0]` |
 | M24 | accept lone surrogate parameter | `tests/test_review.py::test_a_lone_surrogate_value_is_refused_up_front` |
 
-## Independent stages
+## QA lenses: round 1
 
-Items 16 and 19 have not been run for this release. No lens verdict or independent
-reviewer pass is claimed. Item 17 merge and publication remain pending.
+Reviewed base: `5eea1002049efd3bdf980a8f869621fc18b3dac0`, on 2026-11-01.
+Fix commit: `30f74964781bc1a216a9345f642b4859b0136b87`. All nine findings accepted.
 
-## Final gates
+| Finding | Change and detecting contract |
+| --- | --- |
+| C-001 | Normalize string subclasses before validation and storage, including keys/values; `test_string_inputs.py` covers injected delimiters, false lengths, overridden operations and strict round trips. |
+| C-002 | Preserve stdin encoding and replace malformed bytes with invalid URI characters; `test_malformed_stdin_preserves_valid_neighbors` checks bounded diagnostics and continued output in all three modes. |
+| D-001 | Ship `requirements-dev.txt` and `scripts/check.ps1`; clarify contributor instructions and assert both archive members. |
+| E01 / M18 | `test_domain_contexts_have_no_dns_length_limits` preserves labels over 63 characters and domains over 253 through construction, build and both parsers. |
+| E02 / M30 | `test_href_escapes_every_hash_and_round_trips_without_a_fragment` asserts the complete href, no URL fragment and link round trip. |
+| E03 / M40 | `test_equality_returns_not_implemented_for_foreign_operands` and `test_equality_allows_the_reflected_comparison` pin both dispatch contracts. |
+| E04 / M51 | `test_link_number_is_not_percent_decoded_twice` and `test_link_cli_rejects_nested_percent_escapes` reject nested escapes; single escapes remain accepted. |
+| E05 / M56 | `test_json_preserves_populated_optional_fields` checks complete subprocess JSON with encoded isub and, separately, a populated extension. |
+| E06 / M60 | `test_stdin_preserves_invalid_whitespace` covers default/strict modes; link tests pin surrounding-space cleanup and rejection of whitespace-only records. |
+
+Before implementation changes, the new contracts had 22 failures and 29 passes;
+the archive check also failed on the two missing files. All 52 focused checks now pass.
+The six exact lens-e mutations each fail behavioural assertions in an isolated copy;
+all 51 new contracts pass before injection and after restoring the sources.
+Each required gate exits 0: formatting, lint, strict source types and pytest (321 passed,
+zero skips, 37.81 seconds). Strict source/test typing also passes on CPython 3.14.6.
+The rebuilt sdist's documented `pip install -r requirements-dev.txt` and
+`scripts/check.ps1` both pass in a fresh environment (321 tests, zero skips).
+Wheel and sdist pass `twine check --strict`. Behaviour changes are in CHANGELOG 1.0.0.
+Lenses c, d and e require independent re-verification; no replacement PASS verdict is
+claimed. Items 16, 19 and the maintainer's merge/publication remain pending.
+
+## Initial certification gates
 
 Each command ran separately and exited 0 on 2026-11-01:
 `ruff format --check .`, `ruff check .`, `mypy --strict src`,
@@ -145,8 +170,8 @@ Tools: ruff 0.17.3, mypy 2.4.1, pytest 9.2.0, pytest-timeout 2.4.0,
 build 1.6.1, twine 7.0.0, phonenumbers 9.0.42 and pypdf 6.21.4.
 The release helper was syntax-checked without executing its publication path.
 
-Final wheel SHA-256: `d6e39f385e8c9055e5f62876c71d69dfa52f7bdcb241d1847fb5eb0f25292ad7`.
-Final sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2b9d5608d`.
+Initial wheel SHA-256: `d6e39f385e8c9055e5f62876c71d69dfa52f7bdcb241d1847fb5eb0f25292ad7`.
+Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2b9d5608d`.
 
 ## Scorecard
 
@@ -157,7 +182,7 @@ Final sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2b9
 | 3 | PASS: 24 doctest statements across every export and public property; README/GUIDE executed |
 | 4 | PASS: strict source and test typing, consumer inference and shipped `py.typed` |
 | 5 | PASS: typed reasons, documented TypeError paths and input-free library diagnostics |
-| 6 | PASS: 270 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
+| 6 | PASS: 321 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
 | 7 | PASS: twelve live-fetched sources, manifest, 245 reference implementation examples |
 | 8 | PASS: clean wheel install, real CLI subprocesses and PyPI 0.2.0 upgrade |
 | 9 | PASS: seeded properties, large inputs and ten scaling shapes |
@@ -169,7 +194,7 @@ Final sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2b9
 | 15 | PASS: four standalone gates exit 0; strict types also include tests |
 | 16 | PENDING: independent reviewer |
 | 17 | PR #3 open, guard CLEAN; merge and publication pending |
-| 18 | PASS: 24 of 24 mutations killed, table above |
-| 19 | PENDING: five independent QA lenses |
+| 18 | PASS: 24 initial mutations killed; all six lens-e survivors now caught, QA table above |
+| 19 | PENDING: nine round 1 findings fixed; independent lens re-verification required |
 
 PR: https://github.com/JaviLianes8/teluri/pull/3
