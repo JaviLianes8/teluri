@@ -70,12 +70,17 @@ def _canonical_order(names: list[str]) -> list[str]:
 def equivalent(a: str | TelURI, b: str | TelURI) -> bool:
     """True when two tel: URIs are equivalent under RFC 3966 section 4.
 
-    Strings are parsed first, so a malformed one raises :class:`TelURIError`.
+    Strings are parsed first, so a malformed one raises :class:`TelURIError`; any other
+    type raises :class:`TypeError` naming the argument.
 
     >>> from teluri import equivalent
     >>> equivalent("tel:+1-201;a=X", "tel:+1201;A=x")
     True
     """
+    if not isinstance(a, (str, TelURI)):
+        raise TypeError("a must be a str or TelURI")
+    if not isinstance(b, (str, TelURI)):
+        raise TypeError("b must be a str or TelURI")
     left = a if isinstance(a, TelURI) else parse(a)
     right = b if isinstance(b, TelURI) else parse(b)
     return left == right

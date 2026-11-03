@@ -25,6 +25,8 @@ All notable changes to this project are documented here. The format follows
   `TypeError` rather than leaking `AttributeError`. `build` checks strings before
   stripping whitespace and rejects false-valued non-mappings in `params`.
 - Wrong-type diagnostics use fixed descriptions rather than user-controlled type names.
+  `equivalent` names the offending argument (`a must be a str or TelURI`, or `b ...`)
+  instead of reporting `uri must be a str` for either one.
 - CLI output failures caused by a closed pipe return 1 without a traceback.
 - String subclasses are normalized to plain strings before validation and storage,
   including mapping keys and values, so overridden operations cannot bypass validation.
