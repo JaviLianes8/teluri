@@ -1,5 +1,7 @@
 # teluri
 
+[![Lianes8 Certified](https://lianes8studio.com/certified/lianes8-certified-badge.svg)](https://lianes8studio.com/certified)
+
 Strict, typed, zero-dependency parser, builder and comparator for `tel:` URIs
 (RFC 3966), with a reader for the `tel:` links found in real web pages and apps.
 
@@ -29,7 +31,7 @@ print(local.phone_context)  # +1914555
 print(local.is_global)  # False
 ```
 
-`parse` validates the whole RFC 3966 grammar and returns a frozen `TelURI`. Visual
+`parse` validates RFC 3966 syntax with the policies in the [guide](https://github.com/JaviLianes8/teluri/blob/main/GUIDE.md) and returns a frozen `TelURI`. Visual
 separators (`-`, `.`, `(`, `)`) are removed from the number, the extension and a numeric
 `phone-context`. Other parameters land in `params`, keyed by lower-case name, with
 percent-decoded values and `None` for a parameter without a value. `str()` gives a
@@ -111,13 +113,14 @@ its Phone app does not dial a link containing `*` or `#`.
 ```
 $ teluri "tel:+1-201-555-0123;Ext=9" "tel:863-1234"
 tel:+12015550123;ext=9
-invalid (missing-context): tel:863-1234
+invalid (missing-context)
 ```
 
 One URI per argument, or one per line on standard input. `--json` prints every field,
 `--strict` enforces the parameter order, `--link` reads links as above (not with
 `--strict`) and `--context` gives local links their context. Output is ASCII, so any
 console can print it. The exit status is 1 when any input is invalid, 2 for bad usage.
+Diagnostics contain the reason, never the input. A closed output pipe exits 1 quietly.
 
 ## API
 
@@ -131,8 +134,8 @@ console can print it. The exit status is 1 when any input is invalid, 2 for bad 
 | `TelURIError` | `ValueError` with a `reason` from `Reason` |
 | `Reason` | The closed set of reasons, listed below |
 
-`is_e164` checks the E.164 limits only: a global number of at most 15 digits whose
-country code does not start with 0. `unknown_mandatory` lists `m-` parameters; section
+`is_e164` checks only global syntax, at most 15 digits and a nonzero first digit;
+it does not check country allocation or dialability. `unknown_mandatory` lists `m-` parameters; section
 5.4 says not to use a URI whose mandatory parameters you do not understand. `isub` is
 kept in its encoded form because a subaddress may carry any octet.
 
@@ -153,12 +156,13 @@ kept in its encoded form because a subaddress may carry any octet.
 
 ## Why
 
-RFC 3966 `tel:` URIs are their own grammar: global numbers with a leading `+`, local
-numbers that must carry a `phone-context`, visual separators, `ext` and `isub`, and a
-comparison rule that ignores separators, case and parameter order. The standard library
-does not model any of it, general URI libraries stop at RFC 3986, and `phonenumbers` is a
-number-validation database rather than a URI codec. teluri is a small, strict, typed one,
-with the browser and phone dialect handled explicitly instead of by accident.
+Use teluri to preserve URI parameters, validate local contexts and compare URI identity.
+[urllib.parse](https://docs.python.org/3/library/urllib.parse.html) splits URL components;
+it does not validate telephone syntax.
+[phonenumbers](https://github.com/daviddrysdale/python-phonenumbers) parses and formats
+phone numbers, including RFC 3966 forms, and supplies numbering-plan validation.
+Choose it when you need country or number validity checks. teluri keeps arbitrary URI
+parameters and local identifiers without a numbering database or runtime dependencies.
 
 ## Sources
 
@@ -167,9 +171,13 @@ RFC 3966 and its errata, the IANA tel URI parameter registry, RFC 4694, 4715, 47
 `python scripts/fetch_upstream.py` to fetch the texts and enable the tests that compare
 against them.
 
+See the [guide and limits](https://github.com/JaviLianes8/teluri/blob/main/GUIDE.md),
+[release changes](https://github.com/JaviLianes8/teluri/blob/main/CHANGELOG.md), and
+[reference manifest](https://github.com/JaviLianes8/teluri/blob/main/tests/upstream/MANIFEST.json).
+
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/JaviLianes8/teluri/blob/main/LICENSE).
 
 ## Links
 

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from urllib.parse import unquote
-
 from ._chars import (
     ALPHA,
     ALPHANUM,
@@ -12,6 +10,7 @@ from ._chars import (
     PARAMCHAR,
     PNAME_CHARS,
     VISUAL_SEPARATORS,
+    decode_pct,
     only,
     strip_separators,
     valid_pct,
@@ -26,14 +25,14 @@ def global_digits(raw: str, reason: Reason = "number") -> str:
     """`global-number-digits`: digits and separators after the `+` the caller has seen."""
     body = raw[1:]
     if not only(body, _GLOBAL) or not strip_separators(body):
-        raise TelURIError(reason, f"not a global number: {raw!r}")
+        raise TelURIError(reason, "expected a global number")
     return "+" + strip_separators(body)
 
 
 def local_digits(raw: str) -> str:
     """`local-number-digits`: hex digits, `*` and `#` with separators, at least one of them."""
     if not only(raw, _LOCAL) or not strip_separators(raw):
-        raise TelURIError("number", f"not a local number: {raw!r}")
+        raise TelURIError("number", "expected a local number")
     return strip_separators(raw)
 
 
@@ -50,7 +49,7 @@ def descriptor(value: str, reason: Reason = "phone-context") -> str:
     if value.startswith("+"):
         return global_digits(value, reason)
     if not is_domainname(value):
-        raise TelURIError(reason, f"not a domain name or global number: {value!r}")
+        raise TelURIError(reason, "expected a domain name or global number")
     return value
 
 
@@ -58,32 +57,32 @@ def extension(value: str) -> str:
     """`ext`: digits and separators; at least one digit, since an empty extension names nothing."""
     digits = strip_separators(value)
     if not only(value, _GLOBAL) or not digits:
-        raise TelURIError("ext", f"not an extension: {value!r}")
+        raise TelURIError("ext", "expected an extension with at least one digit")
     return digits
 
 
 def subaddress(value: str) -> str:
     """`isub` per erratum 203: `1*paramchar`, kept in its encoded form (any octet may occur)."""
     if not value or not valid_pct(value, PARAMCHAR):
-        raise TelURIError("isub", f"not an ISDN subaddress: {value!r}")
+        raise TelURIError("isub", "expected an encoded ISDN subaddress")
     return value
 
 
 def pname(name: str) -> str:
     """`pname`, lower-cased: names compare case-insensitively and SHOULD be lower case."""
     if not name or not only(name, PNAME_CHARS):
-        raise TelURIError("param-name", f"not a parameter name: {name!r}")
+        raise TelURIError("param-name", "expected a parameter name")
     return name.lower()
 
 
 def pvalue(value: str) -> str:
     """`pvalue`, percent-decoded as UTF-8 (an empty one is refused by the model)."""
     if not valid_pct(value, PARAMCHAR):
-        raise TelURIError("param-value", f"not a parameter value: {value!r}")
-    try:
-        return unquote(value, errors="strict")
-    except UnicodeDecodeError:
-        raise TelURIError("param-value", f"not UTF-8 once decoded: {value!r}") from None
+        raise TelURIError("param-value", "expected an encoded parameter value")
+    decoded = decode_pct(value)
+    if decoded is None:
+        raise TelURIError("param-value", "parameter value must decode as UTF-8")
+    return decoded
 
 
 def _is_label(label: str) -> bool:

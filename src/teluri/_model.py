@@ -23,6 +23,10 @@ class TelURI:
     holds the remaining parameters by lower-case name, with decoded values and ``None``
     for a parameter without a value. ``==`` and ``hash`` follow RFC 3966 section 4 and
     ``str()`` gives the canonical form.
+
+    >>> from teluri import TelURI
+    >>> str(TelURI("7042", phone_context="example.com"))
+    'tel:7042;phone-context=example.com'
     """
 
     number: str
@@ -48,28 +52,48 @@ class TelURI:
                 raise TelURIError("global-context", "a global number takes no phone-context")
             set_(self, "phone_context", descriptor(self.phone_context))
         elif not is_global:
-            raise TelURIError("missing-context", f"local number {number!r} needs phone-context")
+            raise TelURIError("missing-context", "a local number needs phone-context")
         set_(self, "params", _checked(self.params))
 
     @property
     def is_global(self) -> bool:
-        """True for a global (E.164) number, written with a leading ``+``."""
+        """True for global syntax, written with a leading ``+``.
+
+        >>> from teluri import TelURI
+        >>> TelURI("+1").is_global
+        True
+        """
         return self.number.startswith("+")
 
     @property
     def is_e164(self) -> bool:
-        """True for a global number of 1 to 15 digits not starting with 0 (E.164 limits)."""
+        """True for 1 to 15 global digits not starting with 0; no allocation check.
+
+        >>> from teluri import TelURI
+        >>> TelURI("+0123").is_e164
+        False
+        """
         digits = self.number[1:]
         return self.is_global and len(digits) <= _E164_MAX_DIGITS and digits[0] != "0"
 
     @property
     def unknown_mandatory(self) -> tuple[str, ...]:
-        """Names of ``m-`` parameters: section 5.4 says not to use a URI it cannot honour."""
+        """Names of ``m-`` parameters, sorted; callers must understand these before use.
+
+        >>> from teluri import TelURI
+        >>> TelURI("+1", params={"m-z": None}).unknown_mandatory
+        ('m-z',)
+        """
         return tuple(name for name in self.params if name.startswith("m-"))
 
     @property
     def href(self) -> str:
-        """The canonical form for an HTML ``href``: ``#`` escaped so it is not a fragment."""
+        """The URI form for an HTML ``href``, with ``#`` escaped; still HTML-escape it.
+
+        >>> from teluri import TelURI
+        >>> TelURI("*31#", phone_context="+1").href
+        'tel:*31%23;phone-context=+1'
+        """
         return str(self).replace("#", "%23")
 
     def __str__(self) -> str:
@@ -113,11 +137,14 @@ class TelURI:
 
 def _check_types(uri: TelURI) -> None:
     if not isinstance(uri.number, str):
-        raise TypeError(f"number must be a str, not {type(uri.number).__name__}")
+        raise TypeError("number must be a str")
+    object.__setattr__(uri, "number", str.__str__(uri.number))
     for name in ("ext", "isub", "phone_context"):
         value = getattr(uri, name)
         if value is not None and not isinstance(value, str):
-            raise TypeError(f"{name} must be a str or None, not {type(value).__name__}")
+            raise TypeError(f"{name} must be a str or None")
+        if value is not None:
+            object.__setattr__(uri, name, str.__str__(value))
     if not isinstance(uri.params, Mapping) or not all(isinstance(k, str) for k in uri.params):
         raise TypeError("params must be a mapping with str keys")
 
@@ -125,13 +152,15 @@ def _check_types(uri: TelURI) -> None:
 def _checked(params: Mapping[str, str | None]) -> Params:
     items: dict[str, str | None] = {}
     for raw, value in params.items():
-        name = pname(raw)
+        name = pname(str.__str__(raw))
         if name in RESERVED_PARAMETERS:
-            raise TelURIError("param-name", f"{name!r} has its own field")
+            raise TelURIError("param-name", "reserved parameters have their own fields")
         if name in items:
-            raise TelURIError("duplicate-param", f"{name!r} appears twice")
+            raise TelURIError("duplicate-param", "a parameter appears twice")
+        if isinstance(value, str):
+            value = str.__str__(value)
         if value is not None and (not isinstance(value, str) or not value or _unencodable(value)):
-            raise TelURIError("param-value", f"{name!r} needs a non-empty text value or None")
+            raise TelURIError("param-value", "parameters need non-empty text values or None")
         items[name] = value
     return Params(dict(sorted(items.items())))
 

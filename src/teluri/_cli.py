@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import errno
+import io
 import json
 import sys
 from collections.abc import Iterable, Sequence
-from typing import TextIO
+from typing import NoReturn, TextIO
 
 from ._errors import TelURIError
 from ._link import parse_link
@@ -15,8 +17,14 @@ from ._model import TelURI
 from ._parse import parse
 
 
+class _Parser(argparse.ArgumentParser):
+    def error(self, message: str) -> NoReturn:
+        # argparse's default message includes arbitrary user input.
+        super().error("invalid command-line arguments; use --help")
+
+
 def _parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _Parser(
         prog="teluri",
         description="Validate tel: URIs (RFC 3966) and print their canonical form. "
         "Reads one URI per line from standard input when none are given.",
@@ -40,15 +48,42 @@ def main(
     stderr: TextIO | None = None,
 ) -> int:
     """Run the command line and return its exit status (0 ok, 1 invalid, 2 usage)."""
+    try:
+        status = _main(argv, stdin, stdout, stderr)
+        (stdout or sys.stdout).flush()
+        (stderr or sys.stderr).flush()
+        return status
+    except OSError as error:
+        # Windows reports a closed anonymous pipe as EINVAL, rather than EPIPE.
+        if not isinstance(error, BrokenPipeError) and not (
+            sys.platform == "win32" and error.errno == errno.EINVAL
+        ):
+            raise
+        # Prevent a second flush of a closed pipe during interpreter shutdown.
+        if stdout is None:
+            sys.stdout = io.StringIO()
+        if stderr is None:
+            sys.stderr = io.StringIO()
+        return 1
+
+
+def _main(
+    argv: Sequence[str] | None,
+    stdin: TextIO | None,
+    stdout: TextIO | None,
+    stderr: TextIO | None,
+) -> int:
     out = stdout or sys.stdout
     err = stderr or sys.stderr
     try:
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             args = _parser().parse_args(argv)
             if args.context is not None and not args.link:
-                _parser().error("--context needs --link")
+                err.write("teluri: error: --context needs --link\n")
+                return 2
             if args.strict and args.link:
-                _parser().error("--strict reads RFC 3966 only and cannot be used with --link")
+                err.write("teluri: error: --strict cannot be used with --link\n")
+                return 2
     except SystemExit as stop:
         return int(stop.code or 0)
     uris: Iterable[str] = args.uris or _lines(stdin or sys.stdin)
@@ -60,7 +95,7 @@ def main(
             else:
                 parsed = parse(uri, strict=args.strict)
         except TelURIError as error:
-            err.write(f"invalid ({error.reason}): {_shown(uri)}\n")
+            err.write(f"invalid ({error.reason})\n")
             status = 1
             continue
         out.write(json.dumps(_fields(parsed)) if args.json else str(parsed))
@@ -82,15 +117,10 @@ def _fields(uri: TelURI) -> dict[str, object]:
 
 
 def _lines(stream: TextIO) -> Iterable[str]:
+    if isinstance(stream, io.TextIOWrapper):
+        # Replacement characters fail URI validation without losing neighboring lines.
+        stream.reconfigure(errors="replace")
     for line in stream:
         text = line.rstrip("\r\n")
         if text:
             yield text
-
-
-def _shown(uri: str) -> str:
-    """The input as safe to print on any console: non-ASCII and control characters escaped."""
-    escape = "unicode_escape"
-    return "".join(
-        c if c.isascii() and c.isprintable() else c.encode(escape).decode("ascii") for c in uri
-    )

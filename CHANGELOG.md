@@ -6,6 +6,67 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-01
+
+### Stable
+
+- The seven exported names, their signatures and defaults: `Reason`, `TelURI`,
+  `TelURIError`, `build`, `equivalent`, `parse` and `parse_link`.
+- Validated immutable URI fields, canonical serialization, RFC 3966 comparison,
+  the explicit link dialect, typed error reasons and command-line modes.
+- Python 3.10 through 3.14; no runtime dependencies; `py.typed` included.
+
+### Changed
+
+- Library errors and CLI diagnostics no longer echo input, parameter names or values.
+  CLI usage errors also omit arbitrary arguments. Error reasons remain unchanged;
+  caller-created `TelURIError(reason, message)` still preserves its message and args.
+- `parse` requires a boolean `strict`; `parse_link` rejects a non-string context with
+  `TypeError` rather than leaking `AttributeError`. `build` checks strings before
+  stripping whitespace and rejects false-valued non-mappings in `params`.
+- Wrong-type diagnostics use fixed descriptions rather than user-controlled type names.
+  `equivalent` names the offending argument (`a must be a str or TelURI`, or `b ...`)
+  instead of reporting `uri must be a str` for either one.
+- CLI output failures caused by a closed pipe return 1 without a traceback.
+- String subclasses are normalized to plain strings before validation and storage,
+  including mapping keys and values, so overridden operations cannot bypass validation.
+- CLI stdin decoding keeps its configured encoding and replaces malformed bytes with
+  characters that fail URI validation. Invalid lines receive bounded diagnostics and
+  valid neighboring lines are processed, even with strict input decoding configured.
+- A parameter value or link number that is not valid UTF-8 raises `TelURIError` without
+  the underlying `UnicodeDecodeError` as `__context__`, so the undecodable input no longer
+  stays reachable from the error. No library error is chained to another exception.
+- Duplicate parameter detection uses a set rather than scanning an ever-growing list.
+- `TelURI` and `TelURIError` identify their public module as `teluri`; old pickles still
+  load, and new pickles also load in 0.2.0. The accidental `annotations` attribute is removed.
+- The release helper checks version availability and a clean working tree, preserves
+  any existing `dist` directory and stops if a quality or build check fails.
+
+### Added
+
+- Runnable public docstrings, a guide with explicit grammar policies, strict consumer
+  typing checks, seeded properties, refreshed source checks and wheel upgrade tests.
+- Source distributions include the development requirements and check script referenced
+  by their contributor instructions.
+- Contracts for long domain contexts, multiple href hashes, reflected equality,
+  single-pass link decoding, populated CLI JSON fields and stdin whitespace handling.
+- Contracts for string subclasses that override indexing or hide invalid numbers and
+  extensions through iteration, and malformed stdin under `ignore` and
+  `surrogateescape` decoding policies while preserving valid neighboring lines.
+- Contracts preserving underlying numbers in strict parsing with overridden partitioning,
+  and constructor numbers and extensions with overridden indexing, including canonical URIs.
+- Contracts rejecting invalid false-valued extension subclasses whose iteration hides
+  their text, and preserving valid false-valued extensions, subaddresses and contexts.
+- Contracts rejecting invalid false-valued number subclasses and preserving valid ones,
+  plus bounded constructor type errors that omit private optional-field input.
+- Contracts pinning the exact constructor type-error messages for `number`, the optional
+  text fields and `params`, so no part of a private input representation can be appended.
+- Contracts requiring every syntax reason and every wrong-type error to carry no
+  `__cause__` or `__context__` and no input in its formatted traceback, plus a source
+  check that no raise chains with `from` or raises a new error inside a handler.
+- The consumer typing check runs inline with no config file or cache, so it writes
+  nothing to disk and does not depend on the pytest temporary directory.
+
 ## [0.2.0]
 
 ### Added

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -30,16 +31,14 @@ uri.number = "+2"
 
 
 @pytest.fixture(scope="module")
-def mypy_output(tmp_path_factory: pytest.TempPathFactory) -> str:
-    folder = tmp_path_factory.mktemp("typing")
-    target = folder / "snippet.py"
-    target.write_text(SNIPPET, encoding="utf-8")
-    config = folder / "mypy.ini"
-    config.write_text(f"[mypy]\nmypy_path = {SRC.as_posix()}\n", encoding="utf-8")
-    cache = str(folder / "cache")
-    out, err, _ = api.run(
-        ["--strict", "--config-file", str(config), "--cache-dir", cache, str(target)]
-    )
+def mypy_output() -> str:
+    # The snippet goes inline with no config file and no cache: the check writes nothing to
+    # disk, so it does not depend on the pytest temporary directory.
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setenv("MYPYPATH", str(SRC))
+        out, err, _ = api.run(
+            ["--strict", "--config-file", "", "--cache-dir", os.devnull, "-c", SNIPPET]
+        )
     return str(out) + str(err)
 
 
@@ -58,17 +57,17 @@ def test_functions_return_their_documented_types(mypy_output: str) -> None:
 
 def test_reasons_are_a_closed_set(mypy_output: str) -> None:
     assert "'missing-context'" in _revealed(mypy_output, 11)
-    assert re.search(r"snippet\.py:12: error: .*\[arg-type\]", mypy_output), mypy_output
+    assert re.search(r"<string>:12: error: .*\[arg-type\]", mypy_output), mypy_output
 
 
 def test_misuse_is_rejected(mypy_output: str) -> None:
-    assert re.search(r"snippet\.py:13: error: Too many positional arguments", mypy_output)
-    assert re.search(r"snippet\.py:14: error: .*\[arg-type\]", mypy_output)
-    assert re.search(r"snippet\.py:15: error: .*\[misc\]", mypy_output)
+    assert re.search(r"<string>:13: error: Too many positional arguments", mypy_output)
+    assert re.search(r"<string>:14: error: .*\[arg-type\]", mypy_output)
+    assert re.search(r"<string>:15: error: .*\[misc\]", mypy_output)
 
 
 def _revealed(output: str, line: int) -> str:
-    match = re.search(rf"snippet\.py:{line}: note: Revealed type is \"(.+)\"", output)
+    match = re.search(rf"<string>:{line}: note: Revealed type is \"(.+)\"", output)
     assert match, output
     # Older mypy releases spell builtins with their module prefix.
     return match.group(1).replace("builtins.", "")

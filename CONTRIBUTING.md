@@ -1,6 +1,8 @@
 # Contributing
 
 Thanks for taking the time. This project keeps a small, predictable shape.
+Run the commands below from the repository root or an unpacked source distribution;
+both include `requirements-dev.txt` and `scripts/check.ps1`.
 
 ## Setup
 
