@@ -20,6 +20,7 @@ Progress:
 - [x] Fix QA round 5 findings E15 and E16; number and private type-error mutations now fail contracts
 - [x] Fix QA round 6 findings E17, E18 and E19; type-error message mutations now fail contracts
 - [x] PR #3 opened from `release/1.0.0`; guard CLEAN
+- [x] Fix review round 1 findings F1 and F2; extension and JSON `e164` mutations now fail contracts
 - [ ] Merge and publication reserved for the maintainer
 
 ## Baseline and API review
@@ -107,6 +108,8 @@ The 201 contract tests ran with `-x`, a 300-second per-test timeout and a 300-se
 subprocess timeout; bytecode writes were disabled. All 24 mutants failed a behavioural
 assertion, with zero survivors. The untouched baseline passed before and after.
 The listed node is the first failing contract, not merely a collection or syntax error.
+R04 and R14 survived at `a5373ba` and were added after review round 1; at `1a8c21f`
+each fails the full suite with `-x`, replayed one at a time with the source restored.
 
 | Id | Deliberate bug | Caught by |
 | --- | --- | --- |
@@ -134,6 +137,8 @@ The listed node is the first failing contract, not merely a collection or syntax
 | M22 | override existing link context | `tests/test_link.py::test_the_links_own_context_wins` |
 | M23 | accept nonboolean strict | `tests/test_safety.py::test_strict_must_be_a_boolean[0]` |
 | M24 | accept lone surrogate parameter | `tests/test_review.py::test_a_lone_surrogate_value_is_refused_up_front` |
+| R04 | extension accepts hex digits, `*` and `#` (review round 1, F1) | `tests/test_review_contracts.py::test_parse_refuses_an_extension_outside_digits_and_separators[12a]` |
+| R14 | CLI JSON `e164` reports `is_global` (review round 1, F2) | `tests/test_review_contracts.py::test_json_tells_a_global_number_from_an_e164_number[+0123]` |
 
 ## QA lenses: round 1
 
@@ -349,6 +354,25 @@ claimed. Items 16, 19 and merge/publication remain pending.
 
 None.
 
+## Review round 1
+
+Reviewed base: `a5373ba877fdd7f255a4eb112b59fca85148cbb2`, on 2026-11-03.
+Fix commit: `1a8c21f9876c4a9d5301cbcaaffbda598fa4288a`. Both findings accepted.
+
+| Finding | Change and detecting contract |
+| --- | --- |
+| F1 (items 6, 18) | `tests/test_review_contracts.py` requires `parse` (global and local forms), `TelURI` and `build` to reject the extensions `12a`, `1*`, `#`, `A`, `*#`, `1-f` and `%31` with reason `ext`, and keeps digits with visual separators valid. Mutation R04 (`only(value, _LOCAL)` in `extension`) now fails it. |
+| F2 (items 6, 18) | A subprocess contract runs `teluri --json` on `tel:+0123` and the 16-digit `tel:+1234567890123456` and compares the whole JSON object, including `"global": true` and `"e164": false`. Mutation R14 (`"e164": uri.is_global`) now fails it. |
+| Wording (item 1) | `equivalent` checks both argument types first and raises `a must be a str or TelURI` or `b must be a str or TelURI`; before, either argument gave `uri must be a str`. The contract pins the exact args and a `None` context; it was red before the change. Recorded in CHANGELOG 1.0.0. |
+
+The library code for F1 and F2 was already correct; only the contracts were missing.
+No public name, signature or error reason changed.
+
+Each required gate exits 0 at the fix commit on this PC (CPython 3.13, ruff 0.17.3,
+mypy 2.4.1, pytest 9.2.0, pytest-timeout 2.4.0): `ruff format --check .`, `ruff check .`,
+`mypy --strict src` (also `src tests`) and `pytest` (433 passed, 9 skipped).
+The findings require independent re-verification; no replacement PASS verdict is claimed.
+
 ## Initial certification gates
 
 Each command ran separately and exited 0 on 2026-11-01:
@@ -372,7 +396,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 3 | PASS: 24 doctest statements across every export and public property; README/GUIDE executed |
 | 4 | PASS: strict source and test typing, consumer inference and shipped `py.typed` |
 | 5 | PASS: typed reasons, documented TypeError paths and input-free library diagnostics |
-| 6 | PASS: 371 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
+| 6 | PASS: 442 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
 | 7 | PASS: twelve live-fetched sources, manifest, 245 reference implementation examples |
 | 8 | PASS: clean wheel install, real CLI subprocesses and PyPI 0.2.0 upgrade |
 | 9 | PASS: seeded properties, large inputs and ten scaling shapes |
@@ -382,9 +406,9 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 13 | PASS: 1.0.0, Production/Stable, MIT, Python classifiers, URLs, no runtime dependencies |
 | 14 | PASS: both distribution member lists and metadata inspected |
 | 15 | PASS: four standalone gates exit 0; strict types also include tests |
-| 16 | PENDING: independent reviewer |
+| 16 | PENDING: review round 1 failed items 6 and 18; F1 and F2 fixed, re-verification required |
 | 17 | PR #3 open, guard CLEAN; merge and publication pending |
-| 18 | PASS: 24 initial mutations killed; all nineteen lens-e survivors now caught, QA tables above |
+| 18 | PASS: 24 initial mutations killed; all nineteen lens-e survivors and review survivors R04 and R14 now caught, tables above |
 | 19 | PENDING: nine round 1, four round 2, three round 3, one round 4, two round 5 and three round 6 findings fixed; independent lens re-verification required |
 
 PR: https://github.com/JaviLianes8/teluri/pull/3
