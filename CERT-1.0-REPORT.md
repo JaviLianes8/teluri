@@ -18,6 +18,7 @@ Progress:
 - [x] Fix all three QA round 3 findings; strict parsing and constructor mutations now fail contracts
 - [x] Fix QA round 4 finding E14; false-valued optional string mutation now fails contracts
 - [x] Fix QA round 5 findings E15 and E16; number and private type-error mutations now fail contracts
+- [x] Fix QA round 6 findings E17, E18 and E19; type-error message mutations now fail contracts
 - [x] PR #3 opened from `release/1.0.0`; guard CLEAN
 - [ ] Merge and publication reserved for the maintainer
 
@@ -277,6 +278,35 @@ CLI subprocess checks and PyPI upgrade. Every test has a 300-second timeout.
 E15 and E16 require independent lens-e re-verification; no replacement PASS verdict
 is claimed. Items 16, 19 and merge/publication remain pending.
 
+## QA lenses: round 6
+
+Reviewed base: `b2c63822491652bc19c2b02656d54fa71805a611`, on 2026-11-03.
+Fix commit: `04d7754930005d062439c8e681e74f66b1a0af6e`. All three findings accepted.
+These are contract gaps: the existing implementation raises fixed constructor
+type-error messages without any input. Runtime behaviour and the public API are
+unchanged. CHANGELOG 1.0.0 records the added coverage.
+
+| Finding | Change and detecting contract |
+| --- | --- |
+| E17 / P04 | `test_constructor_optional_type_errors_do_not_expose_input` now requires `args == (f"{field} must be a str or None",)` for `ext`, `isub` and `phone_context`, and no `private` text in str, repr or args, so a truncated echo of the input fails. |
+| E18 / P05 | `test_constructor_number_type_error_is_exact_and_input_free` passes an object with long private `repr` and `str` as `number` and requires `args == ("number must be a str",)`, the same `str()` and no private text in the repr. |
+| E19 / P06 | `test_constructor_params_type_error_is_exact_and_input_free` covers a non-mapping object, a list and a mapping with a non-str key, each requiring `args == ("params must be a mapping with str keys",)`, the same `str()` and no private text in the repr. |
+
+The three exact mutations were replayed one at a time against the working tree, with
+the source restored and compared byte for byte afterwards. P04 fails the optional-field
+contract, P05 fails the number contract and P06 fails all three params cases. All
+contracts in `tests/test_safety.py` pass on the unchanged source.
+
+Each required gate exits 0 on a clean clone of the fix commit (CPython 3.14.2):
+`ruff format --check .`, `ruff check .`, `mypy --strict src`,
+`mypy --strict src tests` and `pytest` (370 passed, 1 skipped). The full suite enabled
+the fetched source references, installed 0.2.0 comparison, wheel installation, CLI
+subprocess checks and PyPI upgrade. The one skip is the MDN reference: the live page
+no longer matches its recorded SHA-256, so the fetch script refuses it; the other
+eleven sources match. Every test has a 300-second timeout.
+E17, E18 and E19 require independent lens-e re-verification; no replacement PASS
+verdict is claimed. Items 16, 19 and merge/publication remain pending.
+
 ## Initial certification gates
 
 Each command ran separately and exited 0 on 2026-11-01:
@@ -300,7 +330,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 3 | PASS: 24 doctest statements across every export and public property; README/GUIDE executed |
 | 4 | PASS: strict source and test typing, consumer inference and shipped `py.typed` |
 | 5 | PASS: typed reasons, documented TypeError paths and input-free library diagnostics |
-| 6 | PASS: 367 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
+| 6 | PASS: 371 tests cover public behaviour, invalid inputs, CLI, source evidence and upgrade |
 | 7 | PASS: twelve live-fetched sources, manifest, 245 reference implementation examples |
 | 8 | PASS: clean wheel install, real CLI subprocesses and PyPI 0.2.0 upgrade |
 | 9 | PASS: seeded properties, large inputs and ten scaling shapes |
@@ -312,7 +342,7 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 15 | PASS: four standalone gates exit 0; strict types also include tests |
 | 16 | PENDING: independent reviewer |
 | 17 | PR #3 open, guard CLEAN; merge and publication pending |
-| 18 | PASS: 24 initial mutations killed; all sixteen lens-e survivors now caught, QA tables above |
-| 19 | PENDING: nine round 1, four round 2, three round 3, one round 4 and two round 5 findings fixed; independent lens re-verification required |
+| 18 | PASS: 24 initial mutations killed; all nineteen lens-e survivors now caught, QA tables above |
+| 19 | PENDING: nine round 1, four round 2, three round 3, one round 4, two round 5 and three round 6 findings fixed; independent lens re-verification required |
 
 PR: https://github.com/JaviLianes8/teluri/pull/3
