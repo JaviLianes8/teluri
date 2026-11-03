@@ -307,6 +307,48 @@ eleven sources match. Every test has a 300-second timeout.
 E17, E18 and E19 require independent lens-e re-verification; no replacement PASS
 verdict is claimed. Items 16, 19 and merge/publication remain pending.
 
+## QA lenses: round 7
+
+Reviewed base: `bbddcb8773310d8eeb62f9a55b113276a804059a`, on 2026-11-03.
+Fix commit: `cb8e2be426b4c4013c293ca86620887783913e92`. Finding E20 accepted and closed
+for the whole class, not only the three constructor raises it names.
+
+| Finding | Change and detecting contract |
+| --- | --- |
+| E20 (N4, N5, N6) | `_assert_exact_type_error` and `test_constructor_optional_type_errors_do_not_expose_input` now also require `__cause__` and `__context__` to be `None`. The new `tests/test_error_chaining.py` drives every `Reason` and every wrong-type `TypeError` (parse, parse_link, build, TelURI) with a private value and requires no `__cause__`, no `__context__`, no suppressed context and no private text in `traceback.format_exception`; a source check fails on any `raise ... from` and on any new error raised inside an `except` handler. |
+
+The class sweep found two real leaks beyond the named mutants: a parameter value or a
+link number that is not valid UTF-8 raised `TelURIError ... from None`, which hides the
+cause from tracebacks but keeps the `UnicodeDecodeError`, holding the undecoded input
+octets, as `__context__`. Both contracts were red on `bbddcb8`. Decoding now goes
+through `decode_pct`, which returns `None` on failure, and the error is raised outside
+any handler, so `__context__` is `None`. Error types, reasons and messages are
+unchanged; CHANGELOG 1.0.0 records the change.
+
+Mutations replayed one at a time, source restored after each: N4, N5 and N6 (each
+constructor `TypeError` raised `from ValueError(repr(<value>))`) and a chained
+`expected an encoded parameter value` raise in `_grammar.py` all fail; N4 to N6 also
+fail the full suite on Elena's PC.
+
+The `tests/test_typing.py` error the lens saw only in full runs is an invocation issue:
+`--basetemp` named a folder whose parent did not exist, and pytest creates the base
+temporary directory without parents, so the first fixture that asks for one fails with
+`FileNotFoundError` (WinError 3). `test_typing.py` was the only default test using a
+temporary directory; run alone, the lens used an existing parent. Reproduced on
+Elena's PC at `bbddcb8` (all four typing tests error). The typing check now passes its
+snippet inline with no config file and no cache, so it writes nothing to disk and the
+suite no longer depends on the temporary directory: the same invocation exits 0 at
+`cb8e2be`.
+
+Each required gate exits 0 on a clean clone of the fix commit on Elena's PC (CPython
+3.14.2): `ruff format --check .`, `ruff check .`, `mypy --strict src` and `pytest`.
+E20 requires independent lens-e re-verification; no replacement PASS verdict is
+claimed. Items 16, 19 and merge/publication remain pending.
+
+### Disputed findings
+
+None.
+
 ## Initial certification gates
 
 Each command ran separately and exited 0 on 2026-11-01:
