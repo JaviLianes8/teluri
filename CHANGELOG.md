@@ -54,6 +54,8 @@ All notable changes to this project are documented here. The format follows
   their text, and preserving valid false-valued extensions, subaddresses and contexts.
 - Contracts rejecting invalid false-valued number subclasses and preserving valid ones,
   plus bounded constructor type errors that omit private optional-field input.
+- Contracts pinning the exact constructor type-error messages for `number`, the optional
+  text fields and `params`, so no part of a private input representation can be appended.
 
 ## [0.2.0]
 

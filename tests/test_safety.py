@@ -69,9 +69,39 @@ def test_constructor_optional_type_errors_do_not_expose_input(field: str, size: 
     number = "1" if field == "phone_context" else "+1"
     with pytest.raises(TypeError) as caught:
         TelURI(number, **kwargs)  # type: ignore[arg-type]
+    assert caught.value.args == (f"{field} must be a str or None",)
     for diagnostic in (str(caught.value), repr(caught.value), repr(caught.value.args)):
-        assert "private-optional-content-42" not in diagnostic
+        assert "private" not in diagnostic
         assert len(diagnostic) < 100
+
+
+class _PrivateRepr:
+    def __repr__(self) -> str:
+        return "private-repr-content-42" * 1000
+
+    def __str__(self) -> str:
+        return "private-str-content-42" * 1000
+
+
+def _assert_exact_type_error(call: Callable[[], object], message: str) -> None:
+    with pytest.raises(TypeError) as caught:
+        call()
+    assert caught.value.args == (message,)
+    assert str(caught.value) == message
+    assert "private" not in repr(caught.value)
+
+
+def test_constructor_number_type_error_is_exact_and_input_free() -> None:
+    _assert_exact_type_error(lambda: TelURI(_PrivateRepr()), "number must be a str")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "params",
+    [_PrivateRepr(), ["private-list-content-42"], {_PrivateRepr(): "private-value-content-42"}],
+)
+def test_constructor_params_type_error_is_exact_and_input_free(params: object) -> None:
+    message = "params must be a mapping with str keys"
+    _assert_exact_type_error(lambda: TelURI("+1", params=params), message)  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize("value", [False, [], "", 0])
