@@ -11,8 +11,8 @@ Progress:
 - [x] Complete adversarial scaling and installed interpreter matrix
 - [x] Complete mutation round: 24 of 24 killed
 - [x] Final gates and distribution inspection
-- [ ] Independent reviewer (item 16)
-- [ ] Five QA lenses (item 19)
+- [x] Independent reviewer (item 16): round 2 PASS at `40f1f6f`
+- [x] Five QA lenses (item 19): all five PASS
 - [x] Fix all nine QA round 1 findings; six surviving mutations now fail contracts
 - [x] Fix all four QA round 2 findings; four more surviving mutations now fail contracts
 - [x] Fix all three QA round 3 findings; strict parsing and constructor mutations now fail contracts
@@ -373,6 +373,57 @@ mypy 2.4.1, pytest 9.2.0, pytest-timeout 2.4.0): `ruff format --check .`, `ruff 
 `mypy --strict src` (also `src tests`) and `pytest` (433 passed, 9 skipped).
 The findings require independent re-verification; no replacement PASS verdict is claimed.
 
+## QA verdicts (item 19)
+
+Every lens ran on its own clone, executed its checks and reported back only.
+
+| Lens | Rounds | Final verdict | Report | Commit |
+| --- | --- | --- | --- | --- |
+| a. API and docs | 1 | PASS, no findings | evidence archive, lens-a-r1/REPORT.md (laptop run) | `5eea100` |
+| b. Correctness and ground truth | 1 | PASS, no findings | evidence archive, lens-b-r1/REPORT.md (laptop run) | `5eea100` |
+| c. Adversarial and robustness | 2 | PASS | evidence archive, lens-c-r2/REPORT.md (laptop run) | `1df80a3` |
+| d. Packaging and real e2e | 2 | PASS, D-001 fixed | evidence archive, lens-d-r2/REPORT.md (laptop run) | `1df80a3` |
+| e. Contract strength | 8 | PASS, E1 to E20 fixed | certification scratch, lens-e-r8/REPORT.md | `a5373ba` |
+
+Changes after each lens commit touched only contracts, error chaining and the
+`equivalent` type check; the reviewer re-checked them in round 2.
+
+## Review round 2
+
+Reviewed head: `40f1f6f660b7a2dbf0f3d957c1865099d02945eb`, on 2026-11-03. Verdict: PASS.
+Mutations R04, R04b to R04d, R14, R14b, R14c and E1 to E4 were replayed one at a time:
+11 of 11 killed. Gates on a fresh venv (CPython 3.13, pytest 9.2.0): format, lint and
+strict types exit 0; `pytest` 426 passed, 16 skipped (optional fetched-source and e2e
+tests off).
+
+| Item | Result |
+| --- | --- |
+| 1 | PASS: `equivalent` wrong-type message names the right argument; no signature change |
+| 2 | PASS: no export change |
+| 3 | PASS: doctests pass |
+| 4 | PASS: `mypy --strict src` clean |
+| 5 | PASS: new TypeErrors use fixed text, no input echoed, no context |
+| 6 | PASS: F1 and F2 contracts present and biting |
+| 7 | PASS |
+| 8 | PASS |
+| 9 | PASS |
+| 10 | PASS |
+| 11 | PASS |
+| 12 | PASS: dated 1.0.0 section |
+| 13 | PASS |
+| 14 | PASS |
+| 15 | PASS: four gates exit 0 |
+| 16 | PASS: no failed item left |
+| 17 | PASS: PR #3 open, guard CLEAN; merge and publication reserved for the maintainer |
+| 18 | PASS: R04 and R14 killed, plus nine sibling mutations |
+| 19 | PASS: five lenses PASS, table above |
+
+Observation, not blocking: the live pages behind `urllib.html` and `mdn.html` have
+changed since the 2026-11-01 fetch, so their manifest size and sha256 no longer match a
+new download. `scripts/fetch_upstream.py` verifies against the manifest and has no
+refresh mode, so the manifest keeps the 2026-11-01 values; the tests that read those
+two files skip cleanly when they are absent.
+
 ## Initial certification gates
 
 Each command ran separately and exited 0 on 2026-11-01:
@@ -406,9 +457,9 @@ Initial sdist SHA-256: `83d5e0e85792623074c61c333c0f841a0a30a5df7d44d1760e4d74a2
 | 13 | PASS: 1.0.0, Production/Stable, MIT, Python classifiers, URLs, no runtime dependencies |
 | 14 | PASS: both distribution member lists and metadata inspected |
 | 15 | PASS: four standalone gates exit 0; strict types also include tests |
-| 16 | PENDING: review round 1 failed items 6 and 18; F1 and F2 fixed, re-verification required |
-| 17 | PR #3 open, guard CLEAN; merge and publication pending |
+| 16 | PASS: review round 2 at `40f1f6f` scores every item PASS |
+| 17 | PASS: PR #3 open, guard CLEAN; merge and publication reserved for the maintainer |
 | 18 | PASS: 24 initial mutations killed; all nineteen lens-e survivors and review survivors R04 and R14 now caught, tables above |
-| 19 | PENDING: nine round 1, four round 2, three round 3, one round 4, two round 5 and three round 6 findings fixed; independent lens re-verification required |
+| 19 | PASS: lenses a, b, c, d and e all PASS; every finding fixed and re-verified |
 
 PR: https://github.com/JaviLianes8/teluri/pull/3
