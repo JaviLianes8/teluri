@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 VISUAL_SEPARATORS = "-.()"
 _SEPARATOR_TABLE = {ord(char): None for char in VISUAL_SEPARATORS}
@@ -36,6 +36,16 @@ def only(value: str, allowed: frozenset[str]) -> bool:
 def encode_value(text: str) -> str:
     """Percent-encode `text` (UTF-8) so that it is a valid `pvalue`."""
     return quote(text, safe=_SAFE)
+
+
+def decode_pct(value: str) -> str | None:
+    """Percent-decode `value` as UTF-8, or None when the octets are not UTF-8."""
+    try:
+        return unquote(value, errors="strict")
+    except UnicodeDecodeError:
+        # Returned rather than raised: the decode error holds the input octets, and an
+        # error raised by the caller from inside this handler would chain it as context.
+        return None
 
 
 def valid_pct(value: str, allowed: frozenset[str]) -> bool:

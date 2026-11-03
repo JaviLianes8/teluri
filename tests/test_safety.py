@@ -70,6 +70,8 @@ def test_constructor_optional_type_errors_do_not_expose_input(field: str, size: 
     with pytest.raises(TypeError) as caught:
         TelURI(number, **kwargs)  # type: ignore[arg-type]
     assert caught.value.args == (f"{field} must be a str or None",)
+    assert caught.value.__cause__ is None
+    assert caught.value.__context__ is None
     for diagnostic in (str(caught.value), repr(caught.value), repr(caught.value.args)):
         assert "private" not in diagnostic
         assert len(diagnostic) < 100
@@ -89,6 +91,8 @@ def _assert_exact_type_error(call: Callable[[], object], message: str) -> None:
     assert caught.value.args == (message,)
     assert str(caught.value) == message
     assert "private" not in repr(caught.value)
+    assert caught.value.__cause__ is None
+    assert caught.value.__context__ is None
 
 
 def test_constructor_number_type_error_is_exact_and_input_free() -> None:

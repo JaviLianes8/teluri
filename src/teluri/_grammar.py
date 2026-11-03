@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from urllib.parse import unquote
-
 from ._chars import (
     ALPHA,
     ALPHANUM,
@@ -12,6 +10,7 @@ from ._chars import (
     PARAMCHAR,
     PNAME_CHARS,
     VISUAL_SEPARATORS,
+    decode_pct,
     only,
     strip_separators,
     valid_pct,
@@ -80,10 +79,10 @@ def pvalue(value: str) -> str:
     """`pvalue`, percent-decoded as UTF-8 (an empty one is refused by the model)."""
     if not valid_pct(value, PARAMCHAR):
         raise TelURIError("param-value", "expected an encoded parameter value")
-    try:
-        return unquote(value, errors="strict")
-    except UnicodeDecodeError:
-        raise TelURIError("param-value", "parameter value must decode as UTF-8") from None
+    decoded = decode_pct(value)
+    if decoded is None:
+        raise TelURIError("param-value", "parameter value must decode as UTF-8")
+    return decoded
 
 
 def _is_label(label: str) -> bool:

@@ -31,6 +31,9 @@ All notable changes to this project are documented here. The format follows
 - CLI stdin decoding keeps its configured encoding and replaces malformed bytes with
   characters that fail URI validation. Invalid lines receive bounded diagnostics and
   valid neighboring lines are processed, even with strict input decoding configured.
+- A parameter value or link number that is not valid UTF-8 raises `TelURIError` without
+  the underlying `UnicodeDecodeError` as `__context__`, so the undecodable input no longer
+  stays reachable from the error. No library error is chained to another exception.
 - Duplicate parameter detection uses a set rather than scanning an ever-growing list.
 - `TelURI` and `TelURIError` identify their public module as `teluri`; old pickles still
   load, and new pickles also load in 0.2.0. The accidental `annotations` attribute is removed.
@@ -56,6 +59,11 @@ All notable changes to this project are documented here. The format follows
   plus bounded constructor type errors that omit private optional-field input.
 - Contracts pinning the exact constructor type-error messages for `number`, the optional
   text fields and `params`, so no part of a private input representation can be appended.
+- Contracts requiring every syntax reason and every wrong-type error to carry no
+  `__cause__` or `__context__` and no input in its formatted traceback, plus a source
+  check that no raise chains with `from` or raises a new error inside a handler.
+- The consumer typing check runs inline with no config file or cache, so it writes
+  nothing to disk and does not depend on the pytest temporary directory.
 
 ## [0.2.0]
 

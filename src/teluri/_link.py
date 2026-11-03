@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from urllib.parse import unquote
-
+from ._chars import decode_pct
 from ._errors import TelURIError
 from ._grammar import descriptor
 from ._model import TelURI
@@ -35,10 +34,9 @@ def parse_link(href: str, *, context: str | None = None) -> TelURI:
     if not colon or scheme.lower() != "tel":
         raise TelURIError("scheme", "expected a tel: link")
     number, semicolon, tail = rest.partition(";")
-    try:
-        decoded = unquote(number, errors="strict")
-    except UnicodeDecodeError:
-        raise TelURIError("number", "number must decode as UTF-8") from None
+    decoded = decode_pct(number)
+    if decoded is None:
+        raise TelURIError("number", "number must decode as UTF-8")
     cleaned = "".join(char for char in decoded if not char.isspace())
     if ";" in cleaned:  # an encoded separator must not start a parameter
         raise TelURIError("number", "encoded parameter separators are not telephone digits")
